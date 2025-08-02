@@ -24,6 +24,9 @@ public class Event {
     private LocalTime endTime;
     private BigDecimal price;
     private String description;
+    private Long organizerId;
+    private String organizerPhoto;
+
 
     public Long getId() {
         return id;
@@ -111,5 +114,21 @@ public class Event {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Long getOrganizerId() {
+        return organizerId;
+    }
+
+    public void setOrganizerId(Long organizerId) {
+        this.organizerId = organizerId;
+    }
+
+    public String getOrganizerPhoto() {
+        return organizerPhoto;
+    }
+
+    public void setOrganizerPhoto(String organizerPhoto) {
+        this.organizerPhoto = organizerPhoto;
     }
 }

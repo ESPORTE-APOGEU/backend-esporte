@@ -14,6 +14,6 @@ public record EventRequest(
     LocalTime endTime,
     java.math.BigDecimal price,
     String description,
-    Long organizerId,        // para integração com organizador
-    String organizerPhoto    // para exibir foto do organizador
+    Long organizerId,
+    String organizerPhoto
 ) {}

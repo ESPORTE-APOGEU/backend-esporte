@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
@@ -19,6 +21,12 @@ public class UserController {
     @PostMapping
     public ResponseEntity<UserResponse> create(@Valid @RequestBody UserRequest req) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(req));
+    }
+
+    // Novo endpoint para listar todos os usuários
+    @GetMapping
+    public List<UserResponse> listAll() {
+        return service.listAll();
     }
 
     @GetMapping("/{id}")

@@ -6,6 +6,10 @@ import com.esporte.myapp.dto.UserResponse;
 import com.esporte.myapp.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -38,5 +42,9 @@ public class UserService {
 
     private UserResponse toResponse(User u) {
         return new UserResponse(u.getId(), u.getName(), u.getEmail(), u.getCreatedAt());
+    }
+
+    public List<UserResponse> listAll() {
+        return repo.findAll().stream().map(this::toResponse).collect(Collectors.toList());
     }
 }

@@ -1,0 +1,3 @@
+INSERT INTO event_participants (event_id, user_id, participant_name, participant_photo) VALUES (3, 123, 'Diego Alcantara', 'https://example.com/photo1.jpg');
+INSERT INTO event_participants (event_id, user_id, participant_name, participant_photo) VALUES (3, 124, 'Maria Silva', 'https://example.com/photo2.jpg');
+INSERT INTO event_participants (event_id, user_id, participant_name, participant_photo) VALUES (3, 125, 'João Santos', 'https://example.com/photo3.jpg');
