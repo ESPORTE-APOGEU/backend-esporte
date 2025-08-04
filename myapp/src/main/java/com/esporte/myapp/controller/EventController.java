@@ -3,8 +3,8 @@ package com.esporte.myapp.controller;
 
 import com.esporte.myapp.dto.EventRequest;
 import com.esporte.myapp.dto.EventResponse;
-import com.esporte.myapp.entity.EventParticipant;
-import com.esporte.myapp.service.EventEntryService; // Corrigido o package import
+import com.esporte.myapp.dto.UserResponse;
+import com.esporte.myapp.service.EventEntryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -38,9 +38,9 @@ public class EventController {
         return service.listAll();
     }
 
-    // Lista participantes de um evento
+    // Agora retorna uma lista de UserResponse
     @GetMapping("/{id}/participants")
-    public List<EventParticipant> getParticipants(@PathVariable("id") Long id) {
+    public List<UserResponse> getParticipants(@PathVariable("id") Long id) {
         return service.getParticipants(id);
     }
 }

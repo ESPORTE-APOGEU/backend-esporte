@@ -4,13 +4,12 @@ import com.esporte.myapp.dto.EventEntryRequest;
 import com.esporte.myapp.dto.EventEntryResponse;
 import com.esporte.myapp.dto.EventRequest;
 import com.esporte.myapp.dto.EventResponse;
+import com.esporte.myapp.dto.UserResponse;
 import com.esporte.myapp.entity.EventEntry;
 import com.esporte.myapp.entity.Event;
 import com.esporte.myapp.repository.EventEntryRepository;
 import com.esporte.myapp.repository.EventRepository;
-import com.esporte.myapp.entity.EventParticipant;
-import com.esporte.myapp.repository.EventParticipantRepository;
-
+import com.esporte.myapp.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,10 +22,9 @@ import java.util.stream.Collectors;
 public class EventEntryService {
     private final EventEntryRepository repo;
     private final EventRepository repository;
-    private final EventParticipantRepository participantRepository;
+    private final UserRepository userRepository; 
 
     public EventEntryResponse requestEntry(EventEntryRequest req) {
-        // Se necessário, verifique se o usuário já solicitou entrada
         EventEntry entry = new EventEntry();
         entry.setEventId(req.getEventId());
         entry.setUserId(req.getUserId());
@@ -47,7 +45,7 @@ public class EventEntryService {
             req.organizerId(), req.organizerPhoto()
         );
         event = repository.save(event);
-        return EventResponse.from(event);    // retorna todos os campos
+        return EventResponse.from(event);
     }
 
     public EventResponse get(Long id) {
@@ -63,7 +61,22 @@ public class EventEntryService {
                          .collect(Collectors.toList());
     }
 
-    public List<EventParticipant> getParticipants(Long eventId) {
-        return participantRepository.findByEventId(eventId);
+    public List<UserResponse> getParticipants(Long eventId) {
+        List<EventEntry> entries = repo.findByEventId(eventId);
+        
+        // Versão modificada que filtra usuários não encontrados em vez de lançar exceção
+        return entries.stream()
+                      .map(entry -> {
+                          try {
+                              return userRepository.findById(entry.getUserId())
+                                     .map(user -> new UserResponse(user.getId(), user.getName(), user.getEmail(), user.getCreatedAt()))
+                                     .orElse(null);
+                          } catch (Exception e) {
+                              System.out.println("Erro ao buscar usuário ID: " + entry.getUserId());
+                              return null;
+                          }
+                      })
+                      .filter(response -> response != null)
+                      .collect(Collectors.toList());
     }
 }
