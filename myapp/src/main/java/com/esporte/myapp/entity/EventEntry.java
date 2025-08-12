@@ -3,11 +3,13 @@ package com.esporte.myapp.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "event_entry")
-public class EventEntry {
+public class EventEntry extends BaseUserRelatedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -15,8 +17,7 @@ public class EventEntry {
     @Column(name = "event_id")
     private Long eventId;
     
-    @Column(name = "user_id") // Define explicitamente evitando conflito
-    private Long userId;
+    // O campo user_id é gerenciado pela herança em BaseUserRelatedEntity
     
     @Column(name = "requested_at")
     private LocalDateTime requestedAt;

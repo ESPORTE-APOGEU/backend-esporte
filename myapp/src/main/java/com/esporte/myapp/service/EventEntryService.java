@@ -27,7 +27,11 @@ public class EventEntryService {
     public EventEntryResponse requestEntry(EventEntryRequest req) {
         EventEntry entry = new EventEntry();
         entry.setEventId(req.getEventId());
-        entry.setUserId(req.getUserId());
+        // Busca o usuário e usa o relacionamento herdado
+        userRepository.findById(req.getUserId())
+              .ifPresentOrElse(entry::setUser, () -> {
+                  throw new RuntimeException("Usuário não encontrado");
+              });
         entry.setRequestedAt(LocalDateTime.now());
         repo.save(entry);
 
@@ -64,19 +68,16 @@ public class EventEntryService {
     public List<UserResponse> getParticipants(Long eventId) {
         List<EventEntry> entries = repo.findByEventId(eventId);
         
-        // Versão modificada que filtra usuários não encontrados em vez de lançar exceção
         return entries.stream()
-                      .map(entry -> {
-                          try {
-                              return userRepository.findById(entry.getUserId())
-                                     .map(user -> new UserResponse(user.getId(), user.getName(), user.getEmail(), user.getCreatedAt()))
-                                     .orElse(null);
-                          } catch (Exception e) {
-                              System.out.println("Erro ao buscar usuário ID: " + entry.getUserId());
-                              return null;
-                          }
-                      })
-                      .filter(response -> response != null)
-                      .collect(Collectors.toList());
+                  .map(entry -> {
+                      if (entry.getUser() != null) {
+                          var user = entry.getUser();
+                          return new UserResponse(user.getId(), user.getName(), user.getEmail(), user.getCreatedAt());
+                      } else {
+                          return null;
+                      }
+                  })
+                  .filter(response -> response != null)
+                  .collect(Collectors.toList());
     }
 }
