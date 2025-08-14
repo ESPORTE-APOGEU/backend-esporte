@@ -17,5 +17,5 @@ public record EventRequest(
         @NotNull @DecimalMin("0.0") BigDecimal price,
         String description,
         @NotNull Double latitude,
-        @NotNull Double longitude,
+        @NotNull Double longitude
 ) {}
