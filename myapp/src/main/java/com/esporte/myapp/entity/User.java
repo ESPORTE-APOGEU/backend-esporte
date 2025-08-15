@@ -26,4 +26,6 @@ public class User {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    // Novo campo para armazenar o avatar/foto do usuário
+    private String photo;
 }
