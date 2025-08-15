@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface EventEntryRepository extends JpaRepository<EventEntry, Long> {
     List<EventEntry> findByEventId(Long eventId);
+
+    List<EventEntry> findByEventIdAndStatus(Long id, String string);
 }

@@ -21,4 +21,7 @@ public class EventEntry extends BaseUserRelatedEntity {
     
     @Column(name = "requested_at")
     private LocalDateTime requestedAt;
+
+    @Column(name = "status")
+    private String status; // Ex.: "PENDING", "ACCEPTED", "DECLINED"
 }
