@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/event-entries")
 @RequiredArgsConstructor
@@ -29,4 +31,9 @@ public class EventEntryController {
     }
     
     // Endpoint para recusar pode ser criado de forma similar
+
+    @GetMapping("/event/{eventId}")
+    public List<com.esporte.myapp.service.EventEntryService.EventEntrySummary> listByEvent(@PathVariable Long eventId) {
+        return service.entriesByEvent(eventId);
+    }
 }

@@ -31,28 +31,21 @@ public class EventEntryService {
     public EventEntryResponse requestEntry(EventEntryRequest req) {
         EventEntry entry = new EventEntry();
         entry.setEventId(req.getEventId());
-        // Busca o usuário solicitante e usa o relacionamento herdado
         userRepository.findById(req.getUserId())
-              .ifPresentOrElse(entry::setUser, () -> {
-                  throw new RuntimeException("Usuário não encontrado");
-              });
+            .ifPresentOrElse(entry::setUser, () -> { throw new RuntimeException("Usuário não encontrado"); });
         entry.setRequestedAt(LocalDateTime.now());
         entry.setStatus("PENDING");
         repo.save(entry);
 
-        // Buscar o evento para obter os dados do organizador
         Event event = repository.findById(req.getEventId())
-                .orElseThrow(() -> new RuntimeException("Evento não encontrado"));
-
-        // Busca o usuário organizador por meio do organizerId contido em Event
+            .orElseThrow(() -> new RuntimeException("Evento não encontrado"));
         User organizer = userRepository.findById(event.getOrganizerId())
-                .orElseThrow(() -> new RuntimeException("Organizador não encontrado"));
+            .orElseThrow(() -> new RuntimeException("Organizador não encontrado"));
 
-        // Cria a notificação para o organizador informando o novo pedido
         Notification notification = new Notification();
         notification.setUser(organizer);
         notification.setType("entry_request");
-        notification.setIconName("info"); // EXISTENTE no front
+        notification.setIconName("info");
         notification.setTitle("Pedido de entrada");
         notification.setDescription("Um usuário solicitou entrada no evento: " + event.getName());
         notification.setTimestamp(LocalDateTime.now());
@@ -61,6 +54,7 @@ public class EventEntryService {
 
         EventEntryResponse res = new EventEntryResponse();
         res.setMessage("Entrada solicitada com sucesso! Aguarde a resposta do organizador.");
+        res.setEntryId(entry.getId()); // <- importante para aceitar depois
         return res;
     }
 
@@ -113,18 +107,19 @@ public class EventEntryService {
     }
 
     public List<UserResponse> getParticipants(Long eventId) {
-        List<EventEntry> entries = repo.findByEventId(eventId);
-        
+        List<EventEntry> entries = repo.findByEventIdAndStatus(eventId, "ACCEPTED");
         return entries.stream()
-                  .map(entry -> {
-                      if (entry.getUser() != null) {
-                          var user = entry.getUser();
-                          return new UserResponse(user.getId(), user.getName(), user.getEmail(), user.getCreatedAt());
-                      } else {
-                          return null;
-                      }
-                  })
-                  .filter(response -> response != null)
-                  .collect(Collectors.toList());
+            .map(e -> {
+                var u = e.getUser();
+                return new UserResponse(u.getId(), u.getName(), u.getEmail(), u.getCreatedAt());
+            })
+            .collect(Collectors.toList());
+    }
+
+    public record EventEntrySummary(Long id, Long userId, String status) {}
+    public List<EventEntrySummary> entriesByEvent(Long eventId) {
+        return repo.findByEventId(eventId).stream()
+            .map(e -> new EventEntrySummary(e.getId(), e.getUser() != null ? e.getUser().getId() : null, e.getStatus()))
+            .collect(Collectors.toList());
     }
 }
