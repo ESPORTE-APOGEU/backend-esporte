@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS event_entry (
+    id          BIGSERIAL PRIMARY KEY,
+    event_id    BIGINT NOT NULL,
+    user_id     BIGINT NOT NULL,
+    created_at  TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
