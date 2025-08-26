@@ -31,6 +31,11 @@ public class EventEntryController {
     }
     
     // Endpoint para recusar pode ser criado de forma similar
+    @PostMapping("/{entryId}/decline")
+    public ResponseEntity<String> declineEntry(@PathVariable Long entryId) {
+        service.declineEntry(entryId);
+        return ResponseEntity.ok("Pedido recusado com sucesso!");
+    }
 
     @GetMapping("/event/{eventId}")
     public List<com.esporte.myapp.service.EventEntryService.EventEntrySummary> listByEvent(@PathVariable Long eventId) {

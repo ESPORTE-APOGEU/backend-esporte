@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
     List<Notification> findByUser_IdOrderByTimestampDesc(Long userId);
     Optional<Notification> findByIdAndUser_Id(Long id, Long userId);
+    List<Notification> findByUserId(Long userId);
 }

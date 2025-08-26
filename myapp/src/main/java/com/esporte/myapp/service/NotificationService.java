@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,10 +46,10 @@ public class NotificationService {
     }
 
     public List<NotificationResponse> listByUser(Long userId) {
-        return repo.findByUser_IdOrderByTimestampDesc(userId)
-                .stream()
+        List<Notification> notifications = repo.findByUserId(userId);
+        return notifications.stream()
                 .map(this::toResponse)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public NotificationResponse getOne(Long userId, Long id) {

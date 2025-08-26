@@ -35,13 +35,14 @@ public class EventEntryService {
             .ifPresentOrElse(entry::setUser, () -> { throw new RuntimeException("Usuário não encontrado"); });
         entry.setRequestedAt(LocalDateTime.now());
         entry.setStatus("PENDING");
-        repo.save(entry);
+        entry = repo.save(entry);
 
         Event event = repository.findById(req.getEventId())
             .orElseThrow(() -> new RuntimeException("Evento não encontrado"));
         User organizer = userRepository.findById(event.getOrganizerId())
             .orElseThrow(() -> new RuntimeException("Organizador não encontrado"));
 
+        // Criação da notificação para o organizador
         Notification notification = new Notification();
         notification.setUser(organizer);
         notification.setType("entry_request");
@@ -49,12 +50,13 @@ public class EventEntryService {
         notification.setTitle("Pedido de entrada");
         notification.setDescription("Um usuário solicitou entrada no evento: " + event.getName());
         notification.setTimestamp(LocalDateTime.now());
-        notification.setRelatedEventId(event.getId());
+        // **use entry.getId()** para podermos depois aceitar/recusar
+        notification.setRelatedEventId(entry.getId());
         notificationRepository.save(notification);
 
         EventEntryResponse res = new EventEntryResponse();
         res.setMessage("Entrada solicitada com sucesso! Aguarde a resposta do organizador.");
-        res.setEntryId(entry.getId()); // <- importante para aceitar depois
+        res.setEntryId(entry.getId());
         return res;
     }
 
@@ -121,5 +123,27 @@ public class EventEntryService {
         return repo.findByEventId(eventId).stream()
             .map(e -> new EventEntrySummary(e.getId(), e.getUser() != null ? e.getUser().getId() : null, e.getStatus()))
             .collect(Collectors.toList());
+    }
+
+    public void declineEntry(Long entryId) {
+        EventEntry entry = repo.findById(entryId)
+            .orElseThrow(() -> new RuntimeException("Pedido de entrada não encontrado"));
+        entry.setStatus("DECLINED");
+        repo.save(entry);
+
+        // notificação para o solicitante
+        User participant = entry.getUser();
+        Event event = repository.findById(entry.getEventId())
+            .orElseThrow(() -> new RuntimeException("Evento não encontrado"));
+
+        Notification notif = new Notification();
+        notif.setUser(participant);
+        notif.setType("entry_declined");
+        notif.setIconName("info");
+        notif.setTitle("Pedido recusado");
+        notif.setDescription("Seu pedido de entrada no evento “" + event.getName() + "” foi recusado.");
+        notif.setTimestamp(LocalDateTime.now());
+        notif.setRelatedEventId(event.getId());
+        notificationRepository.save(notif);
     }
 }

@@ -1,0 +1,1 @@
+ALTER TABLE event_entry ADD COLUMN requested_at TIMESTAMP;
