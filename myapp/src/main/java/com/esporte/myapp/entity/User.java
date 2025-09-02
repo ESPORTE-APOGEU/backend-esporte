@@ -26,7 +26,8 @@ public class User {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    // Novos campos
+    private String photo;
+
     private LocalDate birthday;
 
     @Enumerated(EnumType.STRING)
@@ -38,4 +39,5 @@ public class User {
     @CollectionTable(name = "user_sports", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "sport")
     private List<String> sports = new ArrayList<>();
+
 }
