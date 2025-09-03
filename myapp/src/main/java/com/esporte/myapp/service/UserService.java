@@ -1,12 +1,11 @@
 package com.esporte.myapp.service;
 
-import com.esporte.myapp.entity.User;
 import com.esporte.myapp.dto.UserRequest;
 import com.esporte.myapp.dto.UserResponse;
+import com.esporte.myapp.entity.User;
 import com.esporte.myapp.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final UserRepository repo;
-    private final PasswordEncoder passwordEncoder;
 
     public UserResponse create(UserRequest req) {
         if (repo.existsById(req.id())) {
@@ -34,16 +32,22 @@ public class UserService {
         return toResponse(user);
     }
 
-    public UserResponse get(Long id) {
+    public UserResponse get(String id) {
         User u = repo.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
         return toResponse(u);
     }
 
     private UserResponse toResponse(User u) {
         return new UserResponse(
-                u.getId(), u.getName(), u.getEmail(), u.getCreatedAt(),
-                u.getBirthday(), u.getGender(), u.getCity(), u.getSports()
+                u.getId(),
+                u.getName(),
+                u.getEmail(),
+                u.getCreatedAt(),
+                u.getBirthday(),
+                u.getGender(),
+                u.getCity(),
+                u.getSports()
         );
     }
 }
