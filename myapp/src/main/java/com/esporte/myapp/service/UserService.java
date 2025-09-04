@@ -15,7 +15,7 @@ public class UserService {
     private final UserRepository repo;
 
     public UserResponse create(UserRequest req) {
-        if (repo.existsById(req.id())) {
+        if (repo.existsById(Long.valueOf(req.id()))) {
             throw new IllegalArgumentException("ID já cadastrado");
         }
 

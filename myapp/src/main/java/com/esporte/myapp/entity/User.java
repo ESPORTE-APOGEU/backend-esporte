@@ -1,5 +1,10 @@
 package com.esporte.myapp.entity;
 
+
+import jakarta.persistence.*;
+import lombok.*;
+
+
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,6 +27,9 @@ public class User {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+
+    private String photo;
 
     private LocalDate birthday;
 

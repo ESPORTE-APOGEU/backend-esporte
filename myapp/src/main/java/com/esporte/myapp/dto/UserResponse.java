@@ -1,10 +1,11 @@
 package com.esporte.myapp.dto;
 
-import java.time.LocalDateTime;
-import java.time.LocalDate;
-import java.util.List;
+import com.esporte.myapp.entity.Gender;
 
-import com.esporte.myapp.enums.Gender;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import java.util.List;
 
 public record UserResponse(
         String id,
