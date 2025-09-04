@@ -2,10 +2,10 @@ package com.esporte.myapp.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.locationtech.jts.geom.Point;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+
 @Entity
 @Table(name = "events")
 @NoArgsConstructor
@@ -25,12 +25,8 @@ public class Event {
     private LocalTime endTime;
     private BigDecimal price;
     private String description;
-    @Column(name = "location_point", columnDefinition = "geography(Point,4326)")
-    private Point locationPoint;
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "creator_id", nullable = false)
-//    private User creator;
-
+    private Long organizerId;
+    private String organizerPhoto;
 
     public Long getId() {
         return id;
@@ -120,10 +116,19 @@ public class Event {
         this.description = description;
     }
 
-    public Point getLocationPoint() { return locationPoint; }
-    public void setLocationPoint(Point locationPoint) { this.locationPoint = locationPoint; }
+    public Long getOrganizerId() {
+        return organizerId;
+    }
 
-//    public User getCreator() {return creator;}
-//    public void setCreator(User creator) {this.creator = creator;}
+    public void setOrganizerId(Long organizerId) {
+        this.organizerId = organizerId;
+    }
 
+    public String getOrganizerPhoto() {
+        return organizerPhoto;
+    }
+
+    public void setOrganizerPhoto(String organizerPhoto) {
+        this.organizerPhoto = organizerPhoto;
+    }
 }
