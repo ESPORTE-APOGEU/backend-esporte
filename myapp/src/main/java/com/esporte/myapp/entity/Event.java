@@ -6,6 +6,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import org.locationtech.jts.geom.Point;
+
 @Entity
 @Table(name = "events")
 @NoArgsConstructor
@@ -130,5 +132,10 @@ public class Event {
 
     public void setOrganizerPhoto(String organizerPhoto) {
         this.organizerPhoto = organizerPhoto;
+    }
+
+    public void setLocationPoint(Point point) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setLocationPoint'");
     }
 }

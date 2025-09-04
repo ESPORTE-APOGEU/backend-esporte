@@ -16,4 +16,14 @@ public record EventRequest(
     String description,
     Long organizerId,
     String organizerPhoto
-) {}
+) {
+
+    public double longitude() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'longitude'");
+    }
+
+    public double latitude() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'latitude'");
+    }}
