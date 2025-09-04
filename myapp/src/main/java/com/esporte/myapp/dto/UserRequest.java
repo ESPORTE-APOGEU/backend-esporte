@@ -4,6 +4,10 @@ package com.esporte.myapp.dto;
 import com.esporte.myapp.entity.Gender;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import java.time.LocalDate;
+import java.util.List;
+
+import com.esporte.myapp.enums.Gender;
 
 import java.time.LocalDate;
 import java.util.List;

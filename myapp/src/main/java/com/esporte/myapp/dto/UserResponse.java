@@ -4,6 +4,7 @@ import com.esporte.myapp.entity.Gender;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
 import java.util.List;
 
 public record UserResponse(
