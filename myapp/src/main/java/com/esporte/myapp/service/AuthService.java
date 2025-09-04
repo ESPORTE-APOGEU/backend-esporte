@@ -1,4 +1,3 @@
-// src/main/java/com/esporte/myapp/service/AuthService.java
 package com.esporte.myapp.service;
 
 import com.esporte.myapp.dto.AuthRequest;
@@ -7,8 +6,8 @@ import com.esporte.myapp.dto.UserRequest;
 import com.esporte.myapp.dto.UserResponse;
 import com.esporte.myapp.entity.User;
 import com.esporte.myapp.repository.UserRepository;
-import com.esporte.myapp.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final JwtUtil jwtUtil;
 
     public UserResponse register(UserRequest request) {
         if (userRepository.findByEmail(request.email()).isPresent()) {
@@ -24,10 +22,10 @@ public class AuthService {
         }
 
         User user = new User();
-        user.setId(request.id());              // <-- sua entidade usa id String
+        user.setId(request.id()); // ID do Clerk
         user.setName(request.name());
         user.setEmail(request.email());
-        user.setBirthday(request.birthday());  // <-- campo é birthday
+        user.setBirthday(request.birthday());
         user.setGender(request.gender());
         user.setCity(request.city());
         user.setSports(request.sports());
@@ -44,14 +42,5 @@ public class AuthService {
                 user.getCity(),
                 user.getSports()
         );
-    }
-
-    public AuthResponse login(AuthRequest request) {
-        User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
-
-        // Sem senha: confie no provedor externo (Clerk/OAuth) e gere o token
-        String token = jwtUtil.generateToken(user);
-        return new AuthResponse(token);
     }
 }

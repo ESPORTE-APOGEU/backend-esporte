@@ -3,4 +3,4 @@ package com.esporte.myapp.dto;
 
 import java.util.List;
 
-public record FriendSuggestionResponse(Long id, String name, String avatar, int mutualCount, List<String> mutualAvatars) {}
+public record FriendSuggestionResponse(String id, String name, String avatar, int mutualCount, List<String> mutualAvatars) {}
