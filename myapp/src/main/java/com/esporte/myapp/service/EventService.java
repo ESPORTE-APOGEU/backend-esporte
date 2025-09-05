@@ -26,7 +26,7 @@ public class EventService {
                 req.startTime(),
                 req.endTime(),
                 req.price(),
-                req.description()
+                req.description(), null, null
         );
         e = repo.save(e);
         return toResponse(e);

@@ -1,21 +1,13 @@
 package com.esporte.myapp.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-<<<<<<< HEAD
-import org.locationtech.jts.geom.Point;
-
-<<<<<<< HEAD
-=======
-=======
->>>>>>> parent of 22174b3 (.)
-=======
->>>>>>> parent of 3e4dcc1 (.)
->>>>>>> parent of 8c9b8c2 (Revert "revertendo")
 @Entity
 @Table(name = "events")
 @NoArgsConstructor
@@ -35,11 +27,8 @@ public class Event {
     private LocalTime endTime;
     private BigDecimal price;
     private String description;
-<<<<<<< HEAD
     private Long organizerId;
     private String organizerPhoto;
-=======
->>>>>>> parent of 54d1e99 (Merge branch 'dev' into origin/feat/back-amizade)
 
     public Long getId() {
         return id;
@@ -128,7 +117,6 @@ public class Event {
     public void setDescription(String description) {
         this.description = description;
     }
-<<<<<<< HEAD
 
     public Long getOrganizerId() {
         return organizerId;
@@ -145,19 +133,4 @@ public class Event {
     public void setOrganizerPhoto(String organizerPhoto) {
         this.organizerPhoto = organizerPhoto;
     }
-<<<<<<< HEAD
-
-    public void setLocationPoint(Point point) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setLocationPoint'");
-    }
-=======
->>>>>>> parent of 54d1e99 (Merge branch 'dev' into origin/feat/back-amizade)
-<<<<<<< HEAD
-=======
-=======
->>>>>>> parent of 22174b3 (.)
-=======
->>>>>>> parent of 3e4dcc1 (.)
->>>>>>> parent of 8c9b8c2 (Revert "revertendo")
 }
