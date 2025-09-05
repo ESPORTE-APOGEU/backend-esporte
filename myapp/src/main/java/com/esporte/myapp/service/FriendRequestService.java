@@ -18,7 +18,7 @@ public class FriendRequestService {
     private final FriendRequestRepository friendRequestRepository;
     private final UserRepository userRepository;
 
-    public FriendRequest createFriendRequest(Long senderId, Long receiverId) {
+    public FriendRequest createFriendRequest(String senderId, String receiverId) {
         User sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new EntityNotFoundException("Sender not found"));
         User receiver = userRepository.findById(receiverId)
@@ -32,14 +32,14 @@ public class FriendRequestService {
         return friendRequestRepository.save(request);
     }
 
-    public List<FriendRequest> getPendingRequests(Long receiverId) {
+    public List<FriendRequest> getPendingRequests(String receiverId) {
         User receiver = userRepository.findById(receiverId)
                 .orElseThrow(() -> new EntityNotFoundException("Receiver not found"));
 
         return friendRequestRepository.findByReceiverAndStatus(receiver, RequestStatus.PENDING);
     }
 
-    public FriendRequest respondToRequest(Long requestId, RequestStatus status) {
+    public FriendRequest respondToRequest(String requestId, RequestStatus status) {
         FriendRequest request = friendRequestRepository.findById(requestId)
                 .orElseThrow(() -> new EntityNotFoundException("Request not found"));
 
