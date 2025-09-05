@@ -33,3 +33,8 @@ build/
 .vscode/
 myapp/db-data
 /db-data
+
+# Default ignored files
+/shelf/
+/workspace.xml
+# Editor-based HTTP

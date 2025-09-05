@@ -1,6 +1,5 @@
 version: "3.9"
 services:
-<<<<<<< HEAD
   postgres:
 <<<<<<< HEAD
     image: postgres:latest
@@ -8,23 +7,14 @@ services:
 =======
     image: postgres:16
     container_name: myapp-postgres
-=======
-  db:
-    image: postgis/postgis:16-3.4
-    container_name: myapp-postgis
->>>>>>> parent of 22174b3 (.)
     environment:
       POSTGRES_DB: myapp
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypass
-<<<<<<< HEAD
 >>>>>>> parent of 54d1e99 (Merge branch 'dev' into origin/feat/back-amizade)
-=======
->>>>>>> parent of 22174b3 (.)
     ports:
       - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-
-volumes:
-  pgdata:
+    environment:
+      - POSTGRES_DB=myapp
+      - POSTGRES_USER=myuser
+      - POSTGRES_PASSWORD=mypass

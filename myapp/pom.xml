@@ -115,8 +115,12 @@
 				<version>11.7.2</version>
 				<configuration>
 					<url>jdbc:postgresql://localhost:5432/myapp</url>
-					<user>postgres</user>
-					<password>postgres</password>
+					<user>myuser</user>
+					<password>mypass</password>
+					<!-- Permite migrações fora de ordem -->
+					<outOfOrder>true</outOfOrder>
+					<!-- Ignora migrations com padrões específicos -->
+					<ignoreMigrationPatterns>*:ignored</ignoreMigrationPatterns>
 				</configuration>
 			</plugin>
 		</plugins>

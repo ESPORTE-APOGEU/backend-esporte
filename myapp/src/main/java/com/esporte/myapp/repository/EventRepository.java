@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecificationExecutor<Event> {
@@ -32,7 +33,6 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
     List<Event> findByDateGreaterThanEqualAndSportContainingIgnoreCase(LocalDate date, String sport);
 
     List<Event> findByDateGreaterThanEqualAndDescriptionContainingIgnoreCase(LocalDate date, String description);
-<<<<<<< HEAD
     
     @Query("SELECT e FROM Event e WHERE FUNCTION('TIMESTAMP', e.date, e.startTime) BETWEEN :startDateTime AND :endDateTime")
     List<Event> findEventsStartingBetween(@Param("startDateTime") LocalDateTime startDateTime, @Param("endDateTime") LocalDateTime endDateTime);
@@ -40,8 +40,4 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
 
 public interface EventRepository extends JpaRepository<Event, Long> {
 >>>>>>> parent of 54d1e99 (Merge branch 'dev' into origin/feat/back-amizade)
-=======
-
-
->>>>>>> parent of 22174b3 (.)
 }
