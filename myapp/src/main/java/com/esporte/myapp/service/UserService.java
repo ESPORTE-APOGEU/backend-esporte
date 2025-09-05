@@ -17,18 +17,14 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     public UserResponse create(UserRequest req) {
-        if (repo.existsById(Long.valueOf(req.id()))) {
-            throw new IllegalArgumentException("ID já cadastrado");
-        }
+        repo.findByEmail(req.email()).ifPresent(u -> {
+            throw new IllegalArgumentException("Email já cadastrado");
+        });
 
         User user = new User();
-        user.setId(req.id());
         user.setName(req.name());
         user.setEmail(req.email());
-        user.setBirthday(req.birthday());
-        user.setGender(req.gender());
-        user.setCity(req.city());
-        user.setSports(req.sports());
+        user.setPasswordHash(passwordEncoder.encode(req.password()));
 
         user = repo.save(user);
         return toResponse(user);
@@ -41,9 +37,6 @@ public class UserService {
     }
 
     private UserResponse toResponse(User u) {
-        return new UserResponse(
-                u.getId(), u.getName(), u.getEmail(), u.getCreatedAt(),
-                u.getBirthday(), u.getGender(), u.getCity(), u.getSports()
-        );
+        return new UserResponse(u.getId(), u.getName(), u.getEmail(), u.getCreatedAt());
     }
 }
