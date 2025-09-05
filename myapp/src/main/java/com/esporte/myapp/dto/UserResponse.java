@@ -1,6 +1,6 @@
 package com.esporte.myapp.dto;
 
-import com.esporte.myapp.entity.Gender;
+import com.esporte.myapp.enums.Gender;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

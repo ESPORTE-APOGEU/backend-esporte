@@ -21,7 +21,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll() // libera login/cadastro
+                        .requestMatchers("/auth/**", "/api/v1/auth/**").permitAll()
                         .anyRequest().authenticated() // protege o restante
                 )
                 .build();

@@ -17,7 +17,7 @@ public class FriendSuggestionController {
     private final FriendSuggestionService friendSuggestionService;
 
     @GetMapping("/{userId}")
-    public ResponseEntity<List<FriendSuggestionResponse>> getSuggestions(@PathVariable Long userId) {
+    public ResponseEntity<List<FriendSuggestionResponse>> getSuggestions(@PathVariable String userId) {
          List<FriendSuggestionResponse> suggestions = friendSuggestionService.getFriendSuggestions(userId);
          return ResponseEntity.ok(suggestions);
     }

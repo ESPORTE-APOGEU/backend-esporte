@@ -18,7 +18,7 @@ public class FriendSuggestionService {
     private final FriendRequestRepository friendRequestRepository;
     private final UserRepository userRepository;
 
-    public List<FriendSuggestionResponse> getFriendSuggestions(Long userId) {
+    public List<FriendSuggestionResponse> getFriendSuggestions(String userId) {
         User currentUser = userRepository.findById(userId)
           .orElseThrow(() -> new RuntimeException("User not found"));
         
