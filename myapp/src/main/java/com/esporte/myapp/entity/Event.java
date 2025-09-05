@@ -5,6 +5,9 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "events")
 @NoArgsConstructor
@@ -24,6 +27,17 @@ public class Event {
     private LocalTime endTime;
     private BigDecimal price;
     private String description;
+
+    @ManyToMany
+    @JoinTable(
+            name = "event_participants",
+            joinColumns = @JoinColumn(name = "event_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<User> participants = new ArrayList<>();
+
+    @Column(name = "avaliations_requested")
+    private Boolean avaliationsRequested = false;
 
     public Long getId() {
         return id;
@@ -111,5 +125,21 @@ public class Event {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public List<User> getParticipants() {
+        return participants;
+    }
+
+    public void setParticipants(List<User> participants) {
+        this.participants = participants;
+    }
+
+    public Boolean getAvaliationsRequested() {
+        return avaliationsRequested;
+    }
+
+    public void setAvaliationsRequested(Boolean avaliationsRequested) {
+        this.avaliationsRequested = avaliationsRequested;
     }
 }

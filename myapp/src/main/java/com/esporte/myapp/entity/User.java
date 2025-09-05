@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -25,5 +27,17 @@ public class User {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @OneToMany(mappedBy = "toUser")
+    private List<Avaliation> receivedAvaliations = new ArrayList<>();
+
+    @Column(name = "total_skill")
+    private Integer totalSkill;
+
+    @Column(name = "total_rating")
+    private Integer totalRating = 0;
+
+    @Column(name = "total_received_evaluations")
+    private Integer totalReceivedEvaluations = 0;
 
 }
