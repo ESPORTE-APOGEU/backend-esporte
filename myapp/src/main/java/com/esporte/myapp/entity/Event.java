@@ -2,12 +2,16 @@ package com.esporte.myapp.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.locationtech.jts.geom.Point;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+<<<<<<< HEAD
 
 import org.locationtech.jts.geom.Point;
 
+=======
+>>>>>>> parent of 22174b3 (.)
 @Entity
 @Table(name = "events")
 @NoArgsConstructor
@@ -28,10 +32,19 @@ public class Event {
     private BigDecimal price;
     private String description;
 <<<<<<< HEAD
+<<<<<<< HEAD
     private Long organizerId;
     private String organizerPhoto;
 =======
 >>>>>>> parent of 54d1e99 (Merge branch 'dev' into origin/feat/back-amizade)
+=======
+    @Column(name = "location_point", columnDefinition = "geography(Point,4326)")
+    private Point locationPoint;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "creator_id", nullable = false)
+//    private User creator;
+
+>>>>>>> parent of 22174b3 (.)
 
     public Long getId() {
         return id;
@@ -122,14 +135,13 @@ public class Event {
     }
 <<<<<<< HEAD
 
-    public Long getOrganizerId() {
-        return organizerId;
-    }
+    public Point getLocationPoint() { return locationPoint; }
+    public void setLocationPoint(Point locationPoint) { this.locationPoint = locationPoint; }
 
-    public void setOrganizerId(Long organizerId) {
-        this.organizerId = organizerId;
-    }
+//    public User getCreator() {return creator;}
+//    public void setCreator(User creator) {this.creator = creator;}
 
+<<<<<<< HEAD
     public String getOrganizerPhoto() {
         return organizerPhoto;
     }
@@ -144,4 +156,6 @@ public class Event {
     }
 =======
 >>>>>>> parent of 54d1e99 (Merge branch 'dev' into origin/feat/back-amizade)
+=======
+>>>>>>> parent of 22174b3 (.)
 }

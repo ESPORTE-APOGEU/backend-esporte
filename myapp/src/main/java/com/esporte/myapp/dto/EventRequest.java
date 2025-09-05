@@ -1,9 +1,12 @@
 package com.esporte.myapp.dto;
 
+import jakarta.validation.constraints.*;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 public record EventRequest(
+<<<<<<< HEAD
 <<<<<<< HEAD
     String name,
     String location,
@@ -29,6 +32,8 @@ public record EventRequest(
         throw new UnsupportedOperationException("Unimplemented method 'latitude'");
     }}
 =======
+=======
+>>>>>>> parent of 22174b3 (.)
         @NotBlank String name,
         @NotBlank String location,
         @NotBlank String sport,
@@ -38,6 +43,13 @@ public record EventRequest(
         @NotNull LocalTime startTime,
         @NotNull LocalTime endTime,
         @NotNull @DecimalMin("0.0") BigDecimal price,
+<<<<<<< HEAD
         String description
 ) {}
 >>>>>>> parent of 54d1e99 (Merge branch 'dev' into origin/feat/back-amizade)
+=======
+        String description,
+        @NotNull Double latitude,
+        @NotNull Double longitude
+) {}
+>>>>>>> parent of 22174b3 (.)
