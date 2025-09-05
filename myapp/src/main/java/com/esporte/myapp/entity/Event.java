@@ -27,8 +27,11 @@ public class Event {
     private LocalTime endTime;
     private BigDecimal price;
     private String description;
+<<<<<<< HEAD
     private Long organizerId;
     private String organizerPhoto;
+=======
+>>>>>>> parent of 54d1e99 (Merge branch 'dev' into origin/feat/back-amizade)
 
     public Long getId() {
         return id;
@@ -117,6 +120,7 @@ public class Event {
     public void setDescription(String description) {
         this.description = description;
     }
+<<<<<<< HEAD
 
     public Long getOrganizerId() {
         return organizerId;
@@ -138,4 +142,6 @@ public class Event {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'setLocationPoint'");
     }
+=======
+>>>>>>> parent of 54d1e99 (Merge branch 'dev' into origin/feat/back-amizade)
 }
