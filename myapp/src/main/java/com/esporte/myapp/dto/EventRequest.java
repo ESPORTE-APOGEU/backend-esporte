@@ -20,7 +20,6 @@ public record EventRequest(
     String description,
     Long organizerId,
     String organizerPhoto
-<<<<<<< HEAD
 ) {
 
     public double longitude() {
@@ -54,6 +53,3 @@ public record EventRequest(
         @NotNull Double longitude
 ) {}
 >>>>>>> parent of 22174b3 (.)
-=======
-) {}
->>>>>>> parent of 3e4dcc1 (.)

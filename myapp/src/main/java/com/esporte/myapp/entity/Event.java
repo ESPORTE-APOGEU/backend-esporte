@@ -8,13 +8,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 <<<<<<< HEAD
 
-<<<<<<< HEAD
 import org.locationtech.jts.geom.Point;
 
 =======
 >>>>>>> parent of 22174b3 (.)
-=======
->>>>>>> parent of 3e4dcc1 (.)
 @Entity
 @Table(name = "events")
 @NoArgsConstructor
@@ -152,7 +149,6 @@ public class Event {
     public void setOrganizerPhoto(String organizerPhoto) {
         this.organizerPhoto = organizerPhoto;
     }
-<<<<<<< HEAD
 
     public void setLocationPoint(Point point) {
         // TODO Auto-generated method stub
@@ -162,6 +158,4 @@ public class Event {
 >>>>>>> parent of 54d1e99 (Merge branch 'dev' into origin/feat/back-amizade)
 =======
 >>>>>>> parent of 22174b3 (.)
-=======
->>>>>>> parent of 3e4dcc1 (.)
 }
