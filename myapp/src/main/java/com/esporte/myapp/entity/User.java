@@ -39,7 +39,7 @@ public class User {
 
     private String city;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER) // <-- ALTERAR AQUI
     @CollectionTable(name = "user_sports", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "sport")
     private List<String> sports = new ArrayList<>();

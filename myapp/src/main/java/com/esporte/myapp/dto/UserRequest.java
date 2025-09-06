@@ -15,7 +15,6 @@ public record UserRequest(
         @NotBlank String id, // ID do Clerk ou seu próprio ID externo (opcional)
         @NotBlank String name,
         @Email @NotBlank String email,
-        @NotBlank String password,     // <-- ADICIONADO
         LocalDate birthday,
         Gender gender,
         String city,
