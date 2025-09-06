@@ -20,7 +20,6 @@ public class UserService {
     // Métodos de escrita não precisam do readOnly = true
     @Transactional
     public UserResponse create(UserRequest req) {
-        // ... seu código existente ...
         if (repo.existsById(req.id())) {
             throw new IllegalArgumentException("ID já cadastrado");
         }
