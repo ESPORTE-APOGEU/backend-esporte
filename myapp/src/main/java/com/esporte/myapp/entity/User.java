@@ -14,7 +14,7 @@ import com.esporte.myapp.enums.Gender;
 
 @Entity
 @Table(name = "users")
-@Getter @Setter
+@Getter @Setter @AllArgsConstructor
 public class User {
 
     @Id
@@ -39,7 +39,7 @@ public class User {
 
     private String city;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER) // <-- ALTERAR AQUI
     @CollectionTable(name = "user_sports", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "sport")
     private List<String> sports = new ArrayList<>();
