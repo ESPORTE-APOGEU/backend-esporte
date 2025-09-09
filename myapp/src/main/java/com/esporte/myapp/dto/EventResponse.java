@@ -3,6 +3,7 @@ package com.esporte.myapp.dto;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 public record EventResponse(
         Long id,
@@ -15,5 +16,6 @@ public record EventResponse(
         LocalTime startTime,
         LocalTime endTime,
         BigDecimal price,
-        String description
+        String description,
+        List<UserResponse> participants
 ) {}
