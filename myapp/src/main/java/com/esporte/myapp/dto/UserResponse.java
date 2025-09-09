@@ -1,5 +1,18 @@
 package com.esporte.myapp.dto;
 
-import java.time.LocalDateTime;
+import com.esporte.myapp.entity.Gender;
 
-public record UserResponse(Long id, String name, String email, LocalDateTime createdAt) {}
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+public record UserResponse(
+        String id,
+        String name,
+        String email,
+        LocalDateTime createdAt,
+        LocalDate birthday,
+        Gender gender,
+        String city,
+        List<String> sports
+) {}
