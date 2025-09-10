@@ -1,0 +1,2 @@
+ALTER TABLE avaliations
+ADD COLUMN IF NOT EXISTS skill_level INTEGER;

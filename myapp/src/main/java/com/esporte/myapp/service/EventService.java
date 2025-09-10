@@ -2,9 +2,12 @@ package com.esporte.myapp.service;
 
 import com.esporte.myapp.dto.EventRequest;
 import com.esporte.myapp.dto.EventResponse;
+import com.esporte.myapp.dto.UserResponse;
 import com.esporte.myapp.dto.EventFilterRequest;
 import com.esporte.myapp.entity.Event;
+import com.esporte.myapp.entity.User;
 import com.esporte.myapp.repository.EventRepository;
+import com.esporte.myapp.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Coordinate;
@@ -12,13 +15,18 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class EventService {
 
     private final EventRepository repo;
+
+    private final UserRepository userRepository;
+  
     private final SearchService searchService;
 
     public List<EventResponse> getUpcomingEvents() {
@@ -76,7 +84,28 @@ public class EventService {
         return toResponse(e);
     }
 
+    @Transactional
+    public void addParticipant(Long eventId, Long userId) {
+        Event event = repo.findById(eventId).orElseThrow(() -> new EntityNotFoundException("Event not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        if (!event.getParticipants().stream().anyMatch(u -> u.getId().equals(user.getId()))) {
+            event.getParticipants().add(user);
+            repo.save(event);
+        }
+    }
+
+    @Transactional
+    public void removeParticipant(Long eventId, Long userId) {
+        Event event = repo.findById(eventId).orElseThrow(() -> new EntityNotFoundException("Event not found"));
+        event.getParticipants().removeIf(u -> u.getId().equals(userId));
+        repo.save(event);
+    }
+
     private EventResponse toResponse(Event e) {
+        List<UserResponse> participants = e.getParticipants().stream()
+                .map(u -> new UserResponse(u.getId(), u.getName(), u.getEmail(), u.getCreatedAt()))
+                .collect(Collectors.toList());
+
         return new EventResponse(
                 e.getId(),
                 e.getName(),
@@ -88,7 +117,8 @@ public class EventService {
                 e.getStartTime(),
                 e.getEndTime(),
                 e.getPrice(),
-                e.getDescription()
+                e.getDescription(),
+                participants
         );
     }
 
