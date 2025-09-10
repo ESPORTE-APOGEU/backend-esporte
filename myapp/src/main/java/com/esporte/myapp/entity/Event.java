@@ -2,6 +2,7 @@ package com.esporte.myapp.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.locationtech.jts.geom.Point;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -27,6 +28,12 @@ public class Event {
     private LocalTime endTime;
     private BigDecimal price;
     private String description;
+    @Column(name = "location_point", columnDefinition = "geography(Point,4326)")
+    private Point locationPoint;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "creator_id", nullable = false)
+//    private User creator;
+
 
     @ManyToMany
     @JoinTable(
@@ -142,4 +149,11 @@ public class Event {
     public void setAvaliationsRequested(Boolean avaliationsRequested) {
         this.avaliationsRequested = avaliationsRequested;
     }
+
+    public Point getLocationPoint() { return locationPoint; }
+    public void setLocationPoint(Point locationPoint) { this.locationPoint = locationPoint; }
+
+//    public User getCreator() {return creator;}
+//    public void setCreator(User creator) {this.creator = creator;}
+
 }
