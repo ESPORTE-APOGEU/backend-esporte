@@ -17,7 +17,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     public UserResponse create(UserRequest req) {
-        if (repo.existsById(Long.valueOf(req.id()))) {
+        if (repo.existsById(req.id())) {
             throw new IllegalArgumentException("ID já cadastrado");
         }
 
@@ -34,7 +34,7 @@ public class UserService {
         return toResponse(user);
     }
 
-    public UserResponse get(Long id) {
+    public UserResponse get(String id) {
         User u = repo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
         return toResponse(u);
@@ -42,8 +42,14 @@ public class UserService {
 
     private UserResponse toResponse(User u) {
         return new UserResponse(
-                u.getId(), u.getName(), u.getEmail(), u.getCreatedAt(),
-                u.getBirthday(), u.getGender(), u.getCity(), u.getSports()
+                u.getId(), 
+                u.getName(), 
+                u.getEmail(), 
+                u.getCreatedAt(),
+                u.getBirthday(), 
+                u.getGender(), 
+                u.getCity(), 
+                u.getSports()
         );
     }
 }

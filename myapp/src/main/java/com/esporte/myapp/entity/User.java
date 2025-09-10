@@ -38,8 +38,6 @@ public class User {
     @Column(name = "total_received_evaluations")
     private Integer totalReceivedEvaluations = 0;
 
-}
-
     private LocalDate birthday;
 
     @Enumerated(EnumType.STRING)

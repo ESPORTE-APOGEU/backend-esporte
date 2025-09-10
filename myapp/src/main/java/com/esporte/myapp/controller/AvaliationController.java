@@ -70,24 +70,24 @@ public class AvaliationController {
     // Alternative endpoint: submit by event+from+to
     @PostMapping("/submit")
     @Transactional
-    public ResponseEntity<Void> submit(@RequestParam Long eventId, @RequestParam Long fromUserId, @RequestParam Long toUserId, @RequestBody AvaliationResponseRequest req) {
-        Optional<Avaliation> found = avaliationRepository.findByEventAndFromUserAndToUser(
-                avaliationService.getEventReferenceById(eventId),
-                avaliationService.getUserReferenceById(fromUserId),
-                avaliationService.getUserReferenceById(toUserId)
-        );
+    public ResponseEntity<Void> submit(@RequestParam String eventId, @RequestParam String fromUserId, @RequestParam String toUserId, @RequestBody AvaliationResponseRequest req) {
+    Optional<Avaliation> found = avaliationRepository.findByEventAndFromUserAndToUser(
+        avaliationService.getEventReferenceById(eventId),
+        avaliationService.getUserReferenceById(fromUserId),
+        avaliationService.getUserReferenceById(toUserId)
+    );
 
-        Avaliation a = found.orElseGet(() -> {
-            Avaliation n = new Avaliation();
-            n.setEvent(avaliationService.getEventReferenceById(eventId));
-            n.setFromUser(avaliationService.getUserReferenceById(fromUserId));
-            n.setToUser(avaliationService.getUserReferenceById(toUserId));
-            n.setStatus(Avaliation.Status.PENDING);
-            n.setRequestedAt(LocalDateTime.now());
-            return avaliationRepository.save(n);
-        });
+    Avaliation a = found.orElseGet(() -> {
+        Avaliation n = new Avaliation();
+        n.setEvent(avaliationService.getEventReferenceById(eventId));
+        n.setFromUser(avaliationService.getUserReferenceById(fromUserId));
+        n.setToUser(avaliationService.getUserReferenceById(toUserId));
+        n.setStatus(Avaliation.Status.PENDING);
+        n.setRequestedAt(LocalDateTime.now());
+        return avaliationRepository.save(n);
+    });
 
-        // reuse respond logic
+        // reutiliza lógica do respond
         AvaliationResponseRequest r = req;
         return respond(a.getId(), r);
     }

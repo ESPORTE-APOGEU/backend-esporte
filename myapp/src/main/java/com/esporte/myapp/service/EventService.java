@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -28,8 +27,6 @@ public class EventService {
     private final EventRepository repo;
 
     private final UserRepository userRepository;
-
-    public EventResponse create(EventRequest req) {
 
     private final SearchService searchService;
 
@@ -90,7 +87,7 @@ public class EventService {
     }
 
     @Transactional
-    public void addParticipant(Long eventId, Long userId) {
+    public void addParticipant(Long eventId, String userId) {
         Event event = repo.findById(eventId).orElseThrow(() -> new EntityNotFoundException("Event not found"));
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
         if (!event.getParticipants().stream().anyMatch(u -> u.getId().equals(user.getId()))) {
@@ -100,31 +97,40 @@ public class EventService {
     }
 
     @Transactional
-    public void removeParticipant(Long eventId, Long userId) {
+    public void removeParticipant(Long eventId, String userId) {
         Event event = repo.findById(eventId).orElseThrow(() -> new EntityNotFoundException("Event not found"));
         event.getParticipants().removeIf(u -> u.getId().equals(userId));
         repo.save(event);
     }
 
     private EventResponse toResponse(Event e) {
-        List<UserResponse> participants = e.getParticipants().stream()
-                .map(u -> new UserResponse(u.getId(), u.getName(), u.getEmail(), u.getCreatedAt()))
-                .collect(Collectors.toList());
+    List<UserResponse> participants = e.getParticipants().stream()
+        .map(u -> new UserResponse(
+            u.getId(),
+            u.getName(),
+            u.getEmail(),
+            u.getCreatedAt(),
+            u.getBirthday(),
+            u.getGender(),
+            u.getCity(),
+            u.getSports()
+        ))
+        .collect(Collectors.toList());
 
-        return new EventResponse(
-                e.getId(),
-                e.getName(),
-                e.getLocation(),
-                e.getSport(),
-                e.getLevel(),
-                e.getGender(),
-                e.getDate(),
-                e.getStartTime(),
-                e.getEndTime(),
-                e.getPrice(),
-                e.getDescription(),
-                participants
-        );
+    return new EventResponse(
+        e.getId(),
+        e.getName(),
+        e.getLocation(),
+        e.getSport(),
+        e.getLevel(),
+        e.getGender(),
+        e.getDate(),
+        e.getStartTime(),
+        e.getEndTime(),
+        e.getPrice(),
+        e.getDescription(),
+        participants
+    );
     }
 
     public List<EventResponse> searchUpcomingByAnyField(String searchTerm) {
