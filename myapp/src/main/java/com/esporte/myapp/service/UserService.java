@@ -63,6 +63,26 @@ public class UserService {
         repo.deleteById(id);
     }
 
+    @Transactional
+    public UserResponse update(String id, UserRequest req) {
+        User u = repo.findById(id).orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
+        if (req.name() != null) u.setName(req.name());
+        if (req.email() != null) u.setEmail(req.email());
+        if (req.birthday() != null) u.setBirthday(req.birthday());
+        if (req.gender() != null) u.setGender(req.gender());
+        if (req.city() != null) u.setCity(req.city());
+        if (req.sports() != null) u.setSports(req.sports());
+        if (req.photo() != null) u.setPhoto(req.photo());
+        return toResponse(repo.save(u));
+    }
+
+    @Transactional
+    public UserResponse updateSports(String id, List<String> sports) {
+        User u = repo.findById(id).orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
+        u.setSports(sports);
+        return toResponse(repo.save(u));
+    }
+
     private UserResponse toResponse(User u) {
         return new UserResponse(
                 u.getId(),
@@ -75,4 +95,6 @@ public class UserService {
                 u.getSports() // O acesso que causava o erro agora ocorre dentro da transação
         );
     }
+
+
 }

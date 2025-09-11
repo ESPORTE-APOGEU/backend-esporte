@@ -32,10 +32,23 @@ public class UserController {
     public ResponseEntity<List<UserResponse>> getAll() {
         return ResponseEntity.ok(service.getAll());
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponse> update(@PathVariable String id, @RequestBody UserRequest req) {
+        return ResponseEntity.ok(service.update(id, req));
+    }
+
+    @PatchMapping("/{id}/sports")
+    public ResponseEntity<UserResponse> updateSports(@PathVariable String id, @RequestBody List<String> sports) {
+        return ResponseEntity.ok(service.updateSports(id, sports));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable String id) {
         service.delete(id);
         return ResponseEntity.noContent().build(); // Retorna o status 204 No Content
     }
+
+
 
 }
