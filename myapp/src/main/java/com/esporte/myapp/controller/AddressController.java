@@ -22,44 +22,67 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AddressController {
     private final AddressService service;
-    @PostMapping("/{userId}")
-    public ResponseEntity<List<AddressResponse>> createAddress(@Valid @RequestBody AddressRequest req, @PathVariable String userId){
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(userId, req));
-    }
-    @GetMapping("/{userId}")
-    public ResponseEntity<List<AddressResponse>> getAddress(@PathVariable String userId, @AuthenticationPrincipal Jwt jwt, org.springframework.security.core.Authentication authentication){
-        String clerkId = (jwt != null) ? jwt.getSubject() : null;
-        if (clerkId == null && authentication != null) {
+    private String getUserId(Jwt jwt, org.springframework.security.core.Authentication authentication) {
+        String userId = (jwt != null) ? jwt.getSubject() : null;
+        if (userId == null && authentication != null) {
             Object principal = authentication.getPrincipal();
             if (principal instanceof String s) {
-                clerkId = s;               // ex.: "user_abc"
+                userId = s;
             } else {
-                clerkId = authentication.getName(); // fallback
+                userId = authentication.getName();
             }
         }
-
-        if (clerkId == null) {
+        if (userId == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Não autenticado");
         }
-        System.out.print("Clerk ID obtido"+clerkId);
+        return userId;
+    }
+
+    @PostMapping
+    public ResponseEntity<List<AddressResponse>> createAddress(
+            @Valid @RequestBody AddressRequest req,
+            @AuthenticationPrincipal Jwt jwt,
+            org.springframework.security.core.Authentication authentication
+            ){
+        String userId = getUserId(jwt, authentication);
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(userId, req));
+    }
+    @GetMapping
+    public ResponseEntity<List<AddressResponse>> getAddress(
+            @AuthenticationPrincipal Jwt jwt,
+            org.springframework.security.core.Authentication authentication){
+        String userId = getUserId(jwt,authentication);
         return ResponseEntity.status(HttpStatus.OK).body(service.get(userId));
     }
-    @PatchMapping("/set_default/{addressId}/{userId}")
-    public ResponseEntity<List<AddressResponse>> setAddressAsDefault(@PathVariable UUID addressId,@PathVariable String userId){
+    @PatchMapping("/set_default/{addressId}")
+    public ResponseEntity<List<AddressResponse>> setAddressAsDefault(
+            @PathVariable UUID addressId,
+            @AuthenticationPrincipal Jwt jwt,
+            org.springframework.security.core.Authentication authentication
+            ){
+        String userId = getUserId(jwt, authentication);
         try {
             return ResponseEntity.status(HttpStatus.OK).body(service.setDefaultAddress(userId, addressId));
         } catch ( IllegalArgumentException e){
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(service.setDefaultAddress(userId, addressId));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(service.setDefaultAddress(userId, addressId));
         }
     }
-    @PutMapping("/{userId}")
-    public ResponseEntity<List<AddressResponse>> updateAddress( @PathVariable String userId, @RequestBody AddressRequest req){
+    @PutMapping
+    public ResponseEntity<List<AddressResponse>> updateAddress(
+            @RequestBody AddressRequest req,
+            @AuthenticationPrincipal Jwt jwt,
+            org.springframework.security.core.Authentication authentication
+            ){
+        String userId = getUserId(jwt,authentication);
         return ResponseEntity.status(HttpStatus.OK).body(service.update(userId,req));
     }
-    @DeleteMapping("/{addressIdStr}/{userId}")
-    public ResponseEntity<List<AddressResponse>> deleteAddress(@PathVariable String addressIdStr, @PathVariable String userId){
-        System.out.print("a");
-        UUID addressId = UUID.fromString(addressIdStr);
+    @DeleteMapping("/{addressId}")
+    public ResponseEntity<List<AddressResponse>> deleteAddress(
+            @PathVariable UUID addressId,
+            @AuthenticationPrincipal Jwt jwt,
+            org.springframework.security.core.Authentication authentication
+        ){
+        String userId = getUserId(jwt,authentication);
         return ResponseEntity.status(HttpStatus.OK).body(service.delete(userId, addressId));
     }
 }
