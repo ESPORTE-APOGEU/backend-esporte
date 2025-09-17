@@ -15,6 +15,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import com.esporte.myapp.mapper.UserMapper;
 
 import java.util.Map;
 
@@ -28,8 +29,14 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(@Valid @RequestBody UserRequest request) {
-        return ResponseEntity.ok(authService.register(request));
+    public ResponseEntity<UserResponse> register(@Valid @RequestBody UserRequest req,
+                                                 @AuthenticationPrincipal Jwt jwt) {
+        String subject = jwt.getSubject(); // id do clerk
+        var fixed = new UserRequest(
+                subject, req.name(), req.email(), req.birthday(),
+                req.gender(), req.city(), req.sports(), req.photo()
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(fixed));
     }
     // AuthController.java (trecho)
     @GetMapping("/me")
@@ -54,20 +61,11 @@ public class AuthController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Não autenticado");
         }
 
+
         User user = userRepository.findById(clerkId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
 
-        UserResponse resp = new UserResponse(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getCreatedAt(),
-                user.getBirthday(),
-                user.getGender(),
-                user.getCity(),
-                user.getSports()
-        );
-        return ResponseEntity.ok(resp);
+        return ResponseEntity.ok(UserMapper.toResponse(user));
     }
 
 }

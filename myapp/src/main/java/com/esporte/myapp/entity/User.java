@@ -39,24 +39,15 @@ public class User {
 
     private String city;
 
-    @ElementCollection(fetch = FetchType.EAGER) // <-- ALTERAR AQUI
-    @CollectionTable(name = "user_sports", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "sport")
-    private List<String> sports = new ArrayList<>();
+    @ManyToMany(fetch = FetchType.LAZY) // EAGER só se precisar mesmo
+    @JoinTable(
+            name = "user_sports",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "sport_id")
+    )
+    private List<Sport> sports = new ArrayList<>();
 
     public User() {}
-
-    public User(String id, String name, String email, LocalDateTime createdAt,
-                LocalDate birthday, Gender gender, String city, List<String> sports) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.createdAt = createdAt;
-        this.birthday = birthday;
-        this.gender = gender;
-        this.city = city;
-        this.sports = sports;
-    }
 
     @Override
     public String toString() {

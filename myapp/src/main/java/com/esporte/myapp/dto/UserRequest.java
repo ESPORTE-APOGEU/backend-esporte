@@ -16,5 +16,6 @@ public record UserRequest(
         LocalDate birthday,
         Gender gender,
         String city,
-        List<String> sports
+        List<String> sports,
+        String photo
 ) {}

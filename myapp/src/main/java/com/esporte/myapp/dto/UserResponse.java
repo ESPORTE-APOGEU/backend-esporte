@@ -1,10 +1,8 @@
 package com.esporte.myapp.dto;
 
 import com.esporte.myapp.enums.Gender;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
 import java.util.List;
 
 public record UserResponse(
@@ -15,5 +13,6 @@ public record UserResponse(
         LocalDate birthday,
         Gender gender,
         String city,
-        List<String> sports
+        List<SportDTO> sports,
+        String photo
 ) {}

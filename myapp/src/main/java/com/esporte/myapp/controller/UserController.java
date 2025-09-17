@@ -7,6 +7,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,37 +21,44 @@ public class UserController {
 
     private final UserService service;
 
-    @PostMapping
-    public ResponseEntity<UserResponse> create(@Valid @RequestBody UserRequest req) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(req));
+    // Cria/atualiza o próprio usuário (usa sub do token, ignora id do body)
+    @PostMapping("/me")
+    public ResponseEntity<UserResponse> createMe(@Valid @RequestBody UserRequest req,
+                                                 @AuthenticationPrincipal Jwt jwt) {
+        String sub = jwt.getSubject();
+        var fixed = new UserRequest(
+                sub,
+                req.name(),
+                req.email(),
+                req.birthday(),
+                req.gender(),
+                req.city(),
+                req.sports(),  // nomes dos esportes
+                req.photo()
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(fixed));
     }
 
-    @GetMapping("/{id}")
-    public UserResponse get(@PathVariable String id) {
-        return service.get(id);
+    @GetMapping("/me")
+    public UserResponse getMe(@AuthenticationPrincipal Jwt jwt) {
+        return service.get(jwt.getSubject());
     }
 
-    @GetMapping
-    public ResponseEntity<List<UserResponse>> getAll() {
-        return ResponseEntity.ok(service.getAll());
+    @PutMapping("/me")
+    public ResponseEntity<UserResponse> updateMe(@AuthenticationPrincipal Jwt jwt,
+                                                 @RequestBody UserRequest req) {
+        return ResponseEntity.ok(service.update(jwt.getSubject(), req));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<UserResponse> update(@PathVariable String id, @RequestBody UserRequest req) {
-        return ResponseEntity.ok(service.update(id, req));
+    @PatchMapping("/me/sports")
+    public ResponseEntity<UserResponse> updateMySports(@AuthenticationPrincipal Jwt jwt,
+                                                       @RequestBody List<String> sports) {
+        return ResponseEntity.ok(service.updateSports(jwt.getSubject(), sports));
     }
 
-    @PatchMapping("/{id}/sports")
-    public ResponseEntity<UserResponse> updateSports(@PathVariable String id, @RequestBody List<String> sports) {
-        return ResponseEntity.ok(service.updateSports(id, sports));
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> deleteMe(@AuthenticationPrincipal Jwt jwt) {
+        service.delete(jwt.getSubject());
+        return ResponseEntity.noContent().build();
     }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable String id) {
-        service.delete(id);
-        return ResponseEntity.noContent().build(); // Retorna o status 204 No Content
-    }
-
-
-
 }
