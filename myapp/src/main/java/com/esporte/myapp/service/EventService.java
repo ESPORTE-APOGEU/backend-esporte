@@ -5,6 +5,7 @@ import com.esporte.myapp.dto.EventResponse;
 import com.esporte.myapp.dto.EventFilterRequest;
 import com.esporte.myapp.entity.Event;
 import com.esporte.myapp.repository.EventRepository;
+import com.esporte.myapp.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Coordinate;
@@ -20,6 +21,8 @@ public class EventService {
 
     private final EventRepository repo;
     private final SearchService searchService;
+    private final UserRepository userRepo;
+
 
     public List<EventResponse> getUpcomingEvents() {
         java.time.LocalDate today = java.time.LocalDate.now();
@@ -51,10 +54,12 @@ public class EventService {
                 .toList();
     }
 
-    public EventResponse create(EventRequest req) {
-        GeometryFactory gf = new GeometryFactory(new PrecisionModel(), 4326);
-        Point point = gf.createPoint(new Coordinate(req.longitude(), req.latitude()));
+    public EventResponse create(EventRequest req, String clerkId) {
+        var creator = userRepo.findById(clerkId)
+                .orElseThrow(() -> new IllegalStateException("Usuário (creator) não encontrado"));
+
         Event e = new Event();
+        e.setCreator(creator);
         e.setName(req.name());
         e.setLocation(req.location());
         e.setSport(req.sport());
@@ -65,7 +70,21 @@ public class EventService {
         e.setEndTime(req.endTime());
         e.setPrice(req.price());
         e.setDescription(req.description());
-        e.setLocationPoint(point);
+        e.setWhatsappLink(req.whatsappLink());
+        e.setPrivate(req.isPrivate());
+        e.setMinParticipants(req.minParticipants());
+        e.setMaxParticipants(req.maxParticipants());
+
+        // Só cria o ponto se vier latitude/longitude
+        if (req.latitude() != null && req.longitude() != null) {
+            GeometryFactory gf = new GeometryFactory(new PrecisionModel(), 4326);
+            // Ordem correta: (lon, lat)
+            Point point = gf.createPoint(new Coordinate(req.longitude(), req.latitude()));
+            e.setLocationPoint(point);
+        } else {
+            e.setLocationPoint(null);
+        }
+
         e = repo.save(e);
         return toResponse(e);
     }

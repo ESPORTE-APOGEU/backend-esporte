@@ -8,6 +8,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,11 +27,14 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity<EventResponse> create(@Valid @RequestBody EventRequest req) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(service.create(req));
+    public ResponseEntity<EventResponse> create(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody EventRequest req
+    ) {
+        String clerkId = jwt.getSubject(); // sub do Clerk
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(req, clerkId));
     }
+
 
     @PostMapping("/filter")
     public java.util.List<EventResponse> filter(@RequestBody EventFilterRequest filter) {
