@@ -26,7 +26,7 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
 
     List<Event> findByDateGreaterThanEqualAndNameContainingIgnoreCase(LocalDate date, String name);
 
-//    List<Event> findByDateGreaterThanEqualAndCreator_NameContainingIgnoreCase(LocalDate date, String creatorName);
+    List<Event> findByDateGreaterThanEqualAndCreator_NameContainingIgnoreCase(LocalDate date, String creatorName);
 
     List<Event> findByDateGreaterThanEqualAndSportContainingIgnoreCase(LocalDate date, String sport);
 

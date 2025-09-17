@@ -85,7 +85,7 @@ public class EventService {
     }
 
     @Transactional
-    public void addParticipant(Long eventId, Long userId) {
+    public void addParticipant(Long eventId, String userId) {
         Event event = repo.findById(eventId).orElseThrow(() -> new EntityNotFoundException("Event not found"));
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
         if (!event.getParticipants().stream().anyMatch(u -> u.getId().equals(user.getId()))) {
@@ -95,16 +95,25 @@ public class EventService {
     }
 
     @Transactional
-    public void removeParticipant(Long eventId, Long userId) {
+    public void removeParticipant(Long eventId, String userId) {
         Event event = repo.findById(eventId).orElseThrow(() -> new EntityNotFoundException("Event not found"));
         event.getParticipants().removeIf(u -> u.getId().equals(userId));
         repo.save(event);
     }
 
     private EventResponse toResponse(Event e) {
-        List<UserResponse> participants = e.getParticipants().stream()
-                .map(u -> new UserResponse(u.getId(), u.getName(), u.getEmail(), u.getCreatedAt()))
-                .collect(Collectors.toList());
+    List<UserResponse> participants = e.getParticipants().stream()
+        .map(u -> new UserResponse(
+            u.getId(),
+            u.getName(),
+            u.getEmail(),
+            u.getCreatedAt(),
+            u.getBirthday(),
+            u.getGender(),
+            u.getCity(),
+            u.getSports()
+        ))
+        .collect(Collectors.toList());
 
         return new EventResponse(
                 e.getId(),
@@ -123,6 +132,37 @@ public class EventService {
     }
 
     public List<EventResponse> searchUpcomingByAnyField(String searchTerm) {
+        // Support special username searches: '@me' or '@username'
+        if (searchTerm != null && searchTerm.startsWith("@")) {
+            String token = searchTerm.substring(1);
+            String targetUserId = null;
+
+            if ("me".equalsIgnoreCase(token)) {
+                // resolve from security context
+                org.springframework.security.core.Authentication authentication = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+                if (authentication != null) {
+                    Object principal = authentication.getPrincipal();
+                    if (principal instanceof String s) targetUserId = s; else targetUserId = authentication.getName();
+                }
+                if (targetUserId == null) return List.of();
+            } else {
+                // lookup user by name -> get id
+                var u = userRepository.findByName(token);
+                if (u.isPresent()) targetUserId = u.get().getId();
+                else return List.of();
+            }
+
+        // now return events where this user is a participant (and upcoming)
+        java.time.LocalDate today = java.time.LocalDate.now();
+        final String tid = targetUserId;
+        return searchService.searchUpcoming("")
+            .stream()
+            .filter(e -> e.getDate().isAfter(today) || e.getDate().isEqual(today))
+            .filter(e -> e.getParticipants().stream().anyMatch(p -> p.getId().equals(tid)))
+            .map(this::toResponse)
+            .toList();
+        }
+
         return searchService.searchUpcomingByAnyField(searchTerm)
                 .stream()
                 .map(this::toResponse)

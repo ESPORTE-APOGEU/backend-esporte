@@ -50,13 +50,13 @@ public class EventController {
     }
 
     @PostMapping("/{id}/participants/{userId}")
-    public ResponseEntity<Void> addParticipant(@PathVariable Long id, @PathVariable Long userId) {
+    public ResponseEntity<Void> addParticipant(@PathVariable Long id, @PathVariable String userId) {
         service.addParticipant(id, userId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @DeleteMapping("/{id}/participants/{userId}")
-    public ResponseEntity<Void> removeParticipant(@PathVariable Long id, @PathVariable Long userId) {
+    public ResponseEntity<Void> removeParticipant(@PathVariable Long id, @PathVariable String userId) {
         service.removeParticipant(id, userId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }

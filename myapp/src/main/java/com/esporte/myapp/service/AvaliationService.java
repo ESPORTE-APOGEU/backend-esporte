@@ -78,12 +78,12 @@ public class AvaliationService {
         return eventRepository.findById(eventId).orElseThrow(() -> new IllegalArgumentException("Event not found"));
     }
 
-    public User getUserReferenceById(Long userId) {
+    public User getUserReferenceById(String userId) {
         return userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
 
     @Transactional
-    public void updateUserAggregatesOnNewCompletion(Long toUserId, Integer rating, Integer skillLevel) {
+    public void updateUserAggregatesOnNewCompletion(String toUserId, Integer rating, Integer skillLevel) {
         // Incrementally update user's aggregated counters instead of recomputing everything
         User user = userRepository.findById(toUserId).orElseThrow(() -> new IllegalArgumentException("User not found"));
 

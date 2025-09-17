@@ -30,9 +30,9 @@ public class Event {
     private String description;
     @Column(name = "location_point", columnDefinition = "geography(Point,4326)")
     private Point locationPoint;
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "creator_id", nullable = false)
-//    private User creator;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_id", nullable = false)
+    private User creator;
 
 
     @ManyToMany
@@ -153,7 +153,7 @@ public class Event {
     public Point getLocationPoint() { return locationPoint; }
     public void setLocationPoint(Point locationPoint) { this.locationPoint = locationPoint; }
 
-//    public User getCreator() {return creator;}
-//    public void setCreator(User creator) {this.creator = creator;}
+    public User getCreator() {return creator;}
+    public void setCreator(User creator) {this.creator = creator;}
 
 }

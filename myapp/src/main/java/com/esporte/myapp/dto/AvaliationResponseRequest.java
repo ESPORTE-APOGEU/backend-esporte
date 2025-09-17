@@ -1,7 +1,7 @@
 package com.esporte.myapp.dto;
 
 public record AvaliationResponseRequest(
-        Long fromUserId,
+        String fromUserId,
         Integer rating,
         String comment,
         String skillLevel

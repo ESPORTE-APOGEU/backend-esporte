@@ -1,0 +1,1 @@
+ALTER TABLE events ADD COLUMN creator_id VARCHAR REFERENCES users(id);

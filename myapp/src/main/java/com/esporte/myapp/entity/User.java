@@ -30,7 +30,6 @@ public class User {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-
     @OneToMany(mappedBy = "toUser")
     private List<Avaliation> receivedAvaliations = new ArrayList<>();
 
