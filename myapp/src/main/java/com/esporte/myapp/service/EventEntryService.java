@@ -50,9 +50,10 @@ public class EventEntryService {
         notification.setTitle("Pedido de entrada");
         notification.setDescription("Um usuário solicitou entrada no evento: " + event.getName());
         notification.setTimestamp(LocalDateTime.now());
-        // Alterar de: notification.setRelatedEventId(entry.getId());
-        // Para usar o ID do evento:
         notification.setRelatedEventId(event.getId());
+        // Armazene também o id da entrada pendente (necessário para aceitar/recusar)
+        notification.setEntryId(entry.getId()); // ← nova propriedade
+
         notificationRepository.save(notification);
 
         EventEntryResponse res = new EventEntryResponse();

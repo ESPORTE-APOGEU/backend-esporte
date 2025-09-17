@@ -23,8 +23,6 @@ public class NotificationService {
     private final NotificationRepository repo;
     private final UserRepository userRepo;
 
-    private static final DateTimeFormatter ISO = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-
     public NotificationResponse create(Long userId, NotificationRequest req) {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
@@ -65,10 +63,11 @@ public class NotificationService {
                 n.getIconName(),
                 n.getTitle(),
                 n.getDescription(),
-                n.getTimestamp() != null ? n.getTimestamp().format(ISO) : null,
+                n.getTimestamp().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 n.getTagText(),
                 n.getTagIcon(),
-                n.getRelatedEventId()
+                n.getRelatedEventId(),
+                n.getEntryId()       // ← use o campo real
         );
     }
 }

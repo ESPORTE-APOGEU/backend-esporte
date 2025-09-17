@@ -2,9 +2,7 @@ package com.esporte.myapp.controller;
 
 import com.esporte.myapp.dto.UserRequest;
 import com.esporte.myapp.dto.UserResponse;
-import com.esporte.myapp.entity.Notification;
 import com.esporte.myapp.service.UserService;
-import com.esporte.myapp.repository.NotificationRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,7 +16,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService service;
-    private final NotificationRepository notificationRepository;
 
     @PostMapping
     public ResponseEntity<UserResponse> create(@Valid @RequestBody UserRequest req) {
@@ -34,12 +31,5 @@ public class UserController {
     @GetMapping("/{id}")
     public UserResponse get(@PathVariable Long id) {
         return service.get(id);
-    }
-
-    @GetMapping("/{id}/notifications")
-    public List<Notification> getNotifications(@PathVariable Long id) {
-        // valida usuário
-        service.get(id);
-        return notificationRepository.findByUserId(id);
     }
 }
