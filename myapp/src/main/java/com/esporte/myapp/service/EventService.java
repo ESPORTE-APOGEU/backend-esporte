@@ -4,6 +4,7 @@ import com.esporte.myapp.dto.EventRequest;
 import com.esporte.myapp.dto.EventResponse;
 import com.esporte.myapp.dto.EventFilterRequest;
 import com.esporte.myapp.entity.Event;
+import com.esporte.myapp.entity.User;
 import com.esporte.myapp.repository.EventRepository;
 import com.esporte.myapp.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -96,6 +97,24 @@ public class EventService {
     }
 
     private EventResponse toResponse(Event e) {
+        User creator = userRepo.findByid(e.getCreator().getId());
+
+        // Ajuste estes getters para o que existir na sua entidade User
+        // (ex.: getFullName()/getName(), getPhotoUrl()/getAvatar(), etc.)
+        String organizerId    = creator != null ? creator.getId() : null; // se seu ID for String, ok; senão toString()
+        String organizerName  = null;
+        String organizerPhoto = null;
+        if (creator != null) {
+            // tente primeiro um "full name" e caia para "name" se necessário
+            try {
+                organizerName = creator.getName();
+            } catch (Exception ignored) {}
+            if (organizerName == null) {
+                try { organizerName = creator.getName(); } catch (Exception ignored) {}
+            }
+
+        }
+
         return new EventResponse(
                 e.getId(),
                 e.getName(),
@@ -107,9 +126,12 @@ public class EventService {
                 e.getStartTime(),
                 e.getEndTime(),
                 e.getPrice(),
-                e.getDescription()
+                e.getDescription(),
+                organizerId,
+                organizerName
         );
     }
+
 
     public List<EventResponse> searchUpcomingByAnyField(String searchTerm) {
         return searchService.searchUpcomingByAnyField(searchTerm)
