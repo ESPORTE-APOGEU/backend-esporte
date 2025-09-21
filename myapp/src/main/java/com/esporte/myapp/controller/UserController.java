@@ -79,4 +79,12 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/me/sports")
+    public ResponseEntity<UserResponse> updateMySports(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestBody List<String> sports
+    ) {
+        return ResponseEntity.ok(service.updateSports(jwt.getSubject(), sports));
+    }
+
 }

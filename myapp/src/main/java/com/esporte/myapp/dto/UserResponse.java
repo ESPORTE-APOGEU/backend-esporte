@@ -16,7 +16,8 @@ public record UserResponse(
         LocalDate birthday,
         Gender gender,
         String city,
-        List<String> sports
+        List<String> sports,
+        String photo
 ) {
     public static UserResponse from(User u) {
         return new UserResponse(
@@ -27,7 +28,8 @@ public record UserResponse(
                 u.getBirthday(),
                 u.getGender(),
                 u.getCity(),
-                u.getSports()
+                u.getSports(),
+                u.getPhoto()
         );
     }
 }

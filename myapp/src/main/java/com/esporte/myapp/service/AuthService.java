@@ -40,7 +40,8 @@ public class AuthService {
                 user.getBirthday(),
                 user.getGender(),
                 user.getCity(),
-                user.getSports()
+                user.getSports(),
+                user.getPhoto()
         );
     }
 }

@@ -57,17 +57,8 @@ public class AuthController {
         User user = userRepository.findById(clerkId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
 
-        UserResponse resp = new UserResponse(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getCreatedAt(),
-                user.getBirthday(),
-                user.getGender(),
-                user.getCity(),
-                user.getSports()
-        );
-        return ResponseEntity.ok(resp);
+        return ResponseEntity.ok(UserResponse.from(user));
+
     }
 
 }

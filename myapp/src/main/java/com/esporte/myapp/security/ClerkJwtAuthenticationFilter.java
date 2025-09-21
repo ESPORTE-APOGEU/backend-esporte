@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  * Extrai o Bearer token, valida com JwtDecoder (JWKS do Clerk)
  * e popula o SecurityContext.
  */
-@Component
+
 public class ClerkJwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtDecoder jwtDecoder;
