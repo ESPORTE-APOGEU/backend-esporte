@@ -10,6 +10,8 @@ import java.time.LocalTime;
 @Table(name = "events")
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,11 +29,20 @@ public class Event {
     private String description;
     @Column(name = "location_point", columnDefinition = "geography(Point,4326)")
     private Point locationPoint;
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "creator_id", nullable = false)
-//    private User creator;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_id", nullable = false)
+    private User creator;
+    @Column(name = "whatsapp_link")
+    private String whatsappLink;
 
+    @Column(name = "is_private")
+    private boolean isPrivate;
 
+    @Column(name = "min_participants")
+    private int minParticipants;
+
+    @Column(name = "max_participants")
+    private int maxParticipants;
     public Long getId() {
         return id;
     }
@@ -123,7 +134,7 @@ public class Event {
     public Point getLocationPoint() { return locationPoint; }
     public void setLocationPoint(Point locationPoint) { this.locationPoint = locationPoint; }
 
-//    public User getCreator() {return creator;}
-//    public void setCreator(User creator) {this.creator = creator;}
+    public User getCreator() {return creator;}
+    public void setCreator(User creator) {this.creator = creator;}
 
 }

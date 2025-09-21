@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,10 +20,12 @@ public class UserController {
 
     private final UserService service;
 
-    // Cria/atualiza o próprio usuário (usa sub do token, ignora id do body)
+    // Cria o próprio usuário (id SEMPRE = sub do token)
     @PostMapping("/me")
-    public ResponseEntity<UserResponse> createMe(@Valid @RequestBody UserRequest req,
-                                                 @AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<UserResponse> createMe(
+            @Valid @RequestBody UserRequest req,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
         String sub = jwt.getSubject();
         var fixed = new UserRequest(
                 sub,
@@ -33,29 +34,55 @@ public class UserController {
                 req.birthday(),
                 req.gender(),
                 req.city(),
-                req.sports(),  // nomes dos esportes
+                req.sports(),
                 req.photo()
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(fixed));
     }
 
+    // Retorna o próprio perfil
     @GetMapping("/me")
-    public UserResponse getMe(@AuthenticationPrincipal Jwt jwt) {
-        return service.get(jwt.getSubject());
+    public ResponseEntity<UserResponse> getMe(@AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(service.get(jwt.getSubject()));
     }
 
+    // Atualiza campos do próprio perfil
     @PutMapping("/me")
-    public ResponseEntity<UserResponse> updateMe(@AuthenticationPrincipal Jwt jwt,
-                                                 @RequestBody UserRequest req) {
+    public ResponseEntity<UserResponse> updateMe(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestBody UserRequest req
+    ) {
         return ResponseEntity.ok(service.update(jwt.getSubject(), req));
     }
 
+    // Atualiza SOMENTE a lista de esportes do próprio perfil
     @PatchMapping("/me/sports")
-    public ResponseEntity<UserResponse> updateMySports(@AuthenticationPrincipal Jwt jwt,
-                                                       @RequestBody List<String> sports) {
+    public ResponseEntity<UserResponse> updateMySports(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestBody List<String> sports
+    ) {
         return ResponseEntity.ok(service.updateSports(jwt.getSubject(), sports));
     }
 
+    // --- Rotas administrativas/diagnóstico (opcionais) ---
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponse> getById(@PathVariable String id) {
+        return ResponseEntity.ok(service.get(id));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<UserResponse>> getAll() {
+        return ResponseEntity.ok(service.getAll());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable String id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // Remove o próprio perfil
     @DeleteMapping("/me")
     public ResponseEntity<Void> deleteMe(@AuthenticationPrincipal Jwt jwt) {
         service.delete(jwt.getSubject());

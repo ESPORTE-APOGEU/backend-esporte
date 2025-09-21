@@ -1,28 +1,31 @@
 package com.esporte.myapp.security;
 
-import org.springframework.beans.factory.annotation.Value;
+import com.esporte.myapp.config.ClerkProps;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.*;
-import org.springframework.security.oauth2.jwt.JwtValidators;
+import org.springframework.security.oauth2.jwt.JwtClaimValidator;
+
+import java.util.List;
 
 @Configuration
+@EnableConfigurationProperties(ClerkProps.class)
 public class JwtConfig {
 
     @Bean
-    public JwtDecoder jwtDecoder(
-            @Value("${clerk.jwks-uri}") String jwksUri,
-            @Value("${clerk.issuer}") String issuer,
-            @Value("${clerk.audience}") String audience
-    ) {
-        NimbusJwtDecoder decoder = NimbusJwtDecoder.withJwkSetUri(jwksUri).build();
+    public JwtDecoder jwtDecoder(ClerkProps props) {
+        NimbusJwtDecoder decoder = NimbusJwtDecoder.withJwkSetUri(props.jwksUri()).build();
 
-        OAuth2TokenValidator<Jwt> withIssuer = JwtValidators.createDefaultWithIssuer(issuer);
-        OAuth2TokenValidator<Jwt> withAudience = new AudienceValidator(audience);
+        OAuth2TokenValidator<Jwt> withIssuer = JwtValidators.createDefaultWithIssuer(props.issuer());
+        OAuth2TokenValidator<Jwt> withAudience = new JwtClaimValidator<List<String>>(
+                "aud",
+                aud -> aud != null && aud.contains(props.audience())
+        );
+
         decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(withIssuer, withAudience));
-
         return decoder;
     }
 }

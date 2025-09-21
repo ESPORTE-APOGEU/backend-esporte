@@ -53,7 +53,6 @@ public class UserService {
         return repo.findAll().stream().map(this::toResponse).toList();
     }
 
-    @Transactional
     public void delete(String id) {
         if (!repo.existsById(id)) throw new EntityNotFoundException("Usuário não encontrado");
         repo.deleteById(id);
@@ -83,21 +82,24 @@ public class UserService {
 
     private List<Sport> resolveSportsByNames(List<String> names) {
         if (names == null) return Collections.emptyList();
+
         List<Sport> result = new ArrayList<>();
         for (String raw : names) {
             String name = Optional.ofNullable(raw).orElse("").trim();
             if (name.isEmpty()) continue;
+
             Sport sport = sportRepo.findByNameIgnoreCase(name)
                     .orElseGet(() -> sportRepo.save(Sport.builder().name(name).build()));
             result.add(sport);
         }
-        // opcional: remover duplicados preservando ordem
+
+        // remove duplicados preservando a ordem de inserção
         return result.stream().collect(Collectors.collectingAndThen(
                 Collectors.toCollection(() -> new LinkedHashSet<>(result)), ArrayList::new));
     }
 
     private UserResponse toResponse(User u) {
-        List<SportDTO> sports = u.getSports() == null ? List.of()
+        List<SportDTO> sports = (u.getSports() == null) ? List.of()
                 : u.getSports().stream()
                 .map(s -> new SportDTO(s.getId(), s.getName()))
                 .toList();
@@ -106,7 +108,7 @@ public class UserService {
                 u.getId(),
                 u.getName(),
                 u.getEmail(),
-                u.getCreatedAt(),
+                u.getCreatedAt(),  // se não existir no entity, troque/retire
                 u.getBirthday(),
                 u.getGender(),
                 u.getCity(),

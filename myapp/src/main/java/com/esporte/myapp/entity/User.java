@@ -47,6 +47,11 @@ public class User {
     )
     private List<Sport> sports = new ArrayList<>();
 
+
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Address> addresses = new ArrayList<>();
+
     public User() {}
 
     @Override

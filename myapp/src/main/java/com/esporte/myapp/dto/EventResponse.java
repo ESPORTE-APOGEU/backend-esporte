@@ -15,5 +15,7 @@ public record EventResponse(
         LocalTime startTime,
         LocalTime endTime,
         BigDecimal price,
-        String description
+        String description,
+        String organizerId,
+        String organizerName
 ) {}
