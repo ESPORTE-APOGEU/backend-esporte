@@ -1,7 +1,7 @@
 package com.esporte.myapp.controller;
 
 import com.esporte.myapp.entity.FriendRequest;
-import com.esporte.myapp.entity.RequestStatus;
+import com.esporte.myapp.enums.RequestStatus;
 import com.esporte.myapp.service.FriendRequestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -1,6 +1,7 @@
 //// filepath: c:\Users\arthu\Documents\APOGEU_PROJECT\BTG\Esportes\backend-esporte\myapp\src\main\java\com\esporte\myapp\entity\FriendRequest.java
 package com.esporte.myapp.entity;
 
+import com.esporte.myapp.enums.RequestStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;

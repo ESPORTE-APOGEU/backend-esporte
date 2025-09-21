@@ -1,7 +1,7 @@
 package com.esporte.myapp.service;
 
 import com.esporte.myapp.entity.FriendRequest;
-import com.esporte.myapp.entity.RequestStatus;
+import com.esporte.myapp.enums.RequestStatus;
 import com.esporte.myapp.entity.User;
 import com.esporte.myapp.repository.FriendRequestRepository;
 import com.esporte.myapp.repository.UserRepository;
