@@ -1,11 +1,8 @@
 package com.esporte.myapp.dto;
 
-import com.esporte.myapp.entity.User;
 import com.esporte.myapp.enums.Gender;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.List;
 
 public record UserResponse(
@@ -16,18 +13,6 @@ public record UserResponse(
         LocalDate birthday,
         Gender gender,
         String city,
-        List<String> sports
-) {
-    public static UserResponse from(User u) {
-        return new UserResponse(
-                u.getId(),
-                u.getName(),
-                u.getEmail(),
-                u.getCreatedAt(),
-                u.getBirthday(),
-                u.getGender(),
-                u.getCity(),
-                u.getSports()
-        );
-    }
-}
+        List<SportDTO> sports,
+        String photo
+) {}

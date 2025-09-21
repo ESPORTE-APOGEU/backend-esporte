@@ -2,13 +2,11 @@ package com.esporte.myapp.controller;
 
 import com.esporte.myapp.dto.UserRequest;
 import com.esporte.myapp.dto.UserResponse;
-import com.esporte.myapp.entity.User;
 import com.esporte.myapp.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -22,55 +20,60 @@ public class UserController {
 
     private final UserService service;
 
-    /**
-     * Retorna o perfil do usuário autenticado (pelo sub do JWT).
-     * 200 se existe, 404 se não existe.
-     */
+    // Cria o próprio usuário (id SEMPRE = sub do token)
+    @PostMapping("/me")
+    public ResponseEntity<UserResponse> createMe(
+            @Valid @RequestBody UserRequest req,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        String sub = jwt.getSubject();
+        var fixed = new UserRequest(
+                sub,
+                req.name(),
+                req.email(),
+                req.birthday(),
+                req.gender(),
+                req.city(),
+                req.sports(),
+                req.photo()
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(fixed));
+    }
+
+    // Retorna o próprio perfil
     @GetMapping("/me")
-    public ResponseEntity<UserResponse> me(
-            @AuthenticationPrincipal Jwt jwt,
-            Authentication authentication
-    ) {
-        String subject = (jwt != null) ? jwt.getSubject()
-                : (authentication != null ? authentication.getName() : null);
-
-        if (subject == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        return service.findById(subject)
-                .map(u -> ResponseEntity.ok(UserResponse.from(u)))
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    public ResponseEntity<UserResponse> getMe(@AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(service.get(jwt.getSubject()));
     }
 
+    // Atualiza campos do próprio perfil
     @PutMapping("/me")
-    public ResponseEntity<UserResponse> upsertMe(
+    public ResponseEntity<UserResponse> updateMe(
             @AuthenticationPrincipal Jwt jwt,
-            Authentication authentication,
-            @Valid @RequestBody UserRequest req
+            @RequestBody UserRequest req
     ) {
-        String subject = (jwt != null) ? jwt.getSubject()
-                : (authentication != null ? authentication.getName() : null);
-
-        if (subject == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        User saved = service.upsert(subject, req);
-        return ResponseEntity.ok(UserResponse.from(saved));
+        return ResponseEntity.ok(service.update(jwt.getSubject(), req));
     }
-    // --- Abaixo, rotas administrativas/diagnóstico (opcionais) ---
+
+    // Atualiza SOMENTE a lista de esportes do próprio perfil
+    @PatchMapping("/me/sports")
+    public ResponseEntity<UserResponse> updateMySports(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestBody List<String> sports
+    ) {
+        return ResponseEntity.ok(service.updateSports(jwt.getSubject(), sports));
+    }
+
+    // --- Rotas administrativas/diagnóstico (opcionais) ---
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getById(@PathVariable String id) {
-        return service.findById(id)
-                .map(u -> ResponseEntity.ok(UserResponse.from(u)))
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        return ResponseEntity.ok(service.get(id));
     }
 
     @GetMapping
     public ResponseEntity<List<UserResponse>> getAll() {
-        return ResponseEntity.ok(service.getAll().stream().map(UserResponse::from).toList());
+        return ResponseEntity.ok(service.getAll());
     }
 
     @DeleteMapping("/{id}")
@@ -79,4 +82,10 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
+    // Remove o próprio perfil
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> deleteMe(@AuthenticationPrincipal Jwt jwt) {
+        service.delete(jwt.getSubject());
+        return ResponseEntity.noContent().build();
+    }
 }
