@@ -45,6 +45,9 @@ public class User {
     @Column(name = "sport")
     private List<String> sports = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Address> addresses = new ArrayList<>();
+
     public User() {}
 
     public User(String id, String name, String email, LocalDateTime createdAt,
