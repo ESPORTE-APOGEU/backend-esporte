@@ -29,7 +29,6 @@ public class NotificationScheduler {
 
         // Buscar eventos começando entre now e twoHoursLater (certifique-se de ter o campo startDateTime ou adapte a lógica)
         List<Event> upcomingEvents = eventRepository.findEventsStartingBetween(now, twoHoursLater);
-
         for (Event event : upcomingEvents) {
             // (Opcional) Verificar se notificações já foram enviadas para evitar duplicidade
 
@@ -42,9 +41,9 @@ public class NotificationScheduler {
                 Notification reminder = new Notification();
                 reminder.setUser(participant);
                 reminder.setType("event_start_reminder");
-                reminder.setIconName("reminder_icon");
-                reminder.setTitle("O evento vai começar em 2 horas");
-                reminder.setDescription("Prepare-se, o evento " + event.getName() + " inicia em duas horas.");
+                reminder.setIconName("calendar");
+                reminder.setTitle("O evento já vai começar!");
+                reminder.setDescription(event.getName() + " começa em 2 horas! Você está pronto?!");
                 reminder.setTimestamp(LocalDateTime.now());
                 reminder.setRelatedEventId(event.getId());
                 notificationRepository.save(reminder);
@@ -53,9 +52,9 @@ public class NotificationScheduler {
                 Notification locationNotif = new Notification();
                 locationNotif.setUser(participant);
                 locationNotif.setType("event_location");
-                locationNotif.setIconName("location_icon");
+                locationNotif.setIconName("info");
                 locationNotif.setTitle("Local do evento");
-                locationNotif.setDescription("O evento " + event.getName() + " acontecerá em " + event.getLocation());
+                locationNotif.setDescription(event.getName() + " está localizado em " + event.getLocation());
                 locationNotif.setTimestamp(LocalDateTime.now());
                 locationNotif.setRelatedEventId(event.getId());
                 notificationRepository.save(locationNotif);

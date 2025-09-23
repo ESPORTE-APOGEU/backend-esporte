@@ -36,7 +36,7 @@ public class NotificationService {
         n.setTagText(req.tagText());
         n.setTagIcon(req.tagIcon());
         n.setRelatedEventId(req.relatedEventId());
-        // se não vier do front, garante timestamp agora
+        n.setEntryId(req.entryId()); // ← garantir persistência do entryId se vier
         if (n.getTimestamp() == null) n.setTimestamp(LocalDateTime.now());
 
         n = repo.save(n);

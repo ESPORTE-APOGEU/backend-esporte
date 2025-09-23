@@ -80,6 +80,10 @@ public class NotificationResponse {
         return entryId;
     }
 
+    public void setEntryId(Long entryId) {
+        this.entryId = entryId;
+    }
+
     @SuppressWarnings("unused")
     private NotificationResponse toResponse(Notification n) {
         return new NotificationResponse(
@@ -88,7 +92,7 @@ public class NotificationResponse {
             n.getIconName(),
             n.getTitle(),
             n.getDescription(),
-            n.getTimestamp().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+            n.getTimestamp() != null ? n.getTimestamp().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : null,
             n.getTagText(),
             n.getTagIcon(),
             n.getRelatedEventId(),

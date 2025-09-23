@@ -2,6 +2,8 @@
 package com.esporte.myapp.service;
 
 import com.esporte.myapp.dto.FriendSuggestionResponse;
+import com.esporte.myapp.entity.FriendRequest;
+import com.esporte.myapp.entity.RequestStatus;
 import com.esporte.myapp.entity.User;
 import com.esporte.myapp.repository.FriendRequestRepository;
 import com.esporte.myapp.repository.UserRepository;
@@ -14,41 +16,73 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class FriendSuggestionService {
-
     private final FriendRequestRepository friendRequestRepository;
     private final UserRepository userRepository;
 
     public List<FriendSuggestionResponse> getFriendSuggestions(Long userId) {
         User currentUser = userRepository.findById(userId)
           .orElseThrow(() -> new RuntimeException("User not found"));
-        
-        // Lista de amigos aceitos do usuário logado
-        List<User> myFriends = friendRequestRepository.findFriendsOfUser(currentUser);
-        
-        // Obter todos os usuários que não sejam o usuário logado nem seus amigos
-        List<User> allUsers = userRepository.findAll();
-        List<User> candidates = allUsers.stream()
-          .filter(u -> !u.getId().equals(userId) && !myFriends.contains(u))
-          .collect(Collectors.toList());
-        
+
+        // Monta amigos aceitos (sem UNION)
+        Set<User> myFriends = new HashSet<>();
+        List<FriendRequest> asReceiver = friendRequestRepository.findByReceiverAndStatus(currentUser, RequestStatus.ACCEPTED);
+        asReceiver.forEach(fr -> myFriends.add(fr.getSender()));
+        List<FriendRequest> asSender = friendRequestRepository.findBySenderAndStatus(currentUser, RequestStatus.ACCEPTED);
+        asSender.forEach(fr -> myFriends.add(fr.getReceiver()));
+
+        List<User> candidates = userRepository.findAll().stream()
+                .filter(u -> !u.getId().equals(userId) && !myFriends.contains(u))
+                .collect(Collectors.toList());
+
         List<FriendSuggestionResponse> suggestions = new ArrayList<>();
+
+        // 1) >=3 amigos em comum
         for (User candidate : candidates) {
-            List<User> candidateFriends = friendRequestRepository.findFriendsOfUser(candidate);
-            // Calcular amigos em comum (interseção)
+            Set<User> candidateFriends = buildFriendSet(candidate);
             Set<User> mutual = new HashSet<>(myFriends);
             mutual.retainAll(candidateFriends);
-            int count = mutual.size();
-            if(count > 0) {
-                // Supondo que User possua método getPhoto() para obter o avatar
+            if (mutual.size() >= 3) {
                 List<String> mutualAvatars = mutual.stream()
-                    .map(User::getPhoto)
-                    .limit(3)
-                    .collect(Collectors.toList());
-                suggestions.add(new FriendSuggestionResponse(candidate.getId(), candidate.getName(), candidate.getPhoto(), count, mutualAvatars));
+                        .map(User::getPhoto)
+                        .filter(Objects::nonNull)
+                        .limit(3)
+                        .toList();
+                suggestions.add(new FriendSuggestionResponse(
+                        candidate.getId(), candidate.getName(), candidate.getPhoto(),
+                        mutual.size(), mutualAvatars));
             }
         }
-        // Ordena as sugestões pela quantidade de amigos em comum (decrescente)
+
+        // 2) Sem amigos em comum, >=2 esportes iguais
+        for (User candidate : candidates) {
+            boolean already = suggestions.stream().anyMatch(s -> s.id().equals(candidate.getId()));
+            if (already) continue;
+
+            Set<User> candidateFriends = buildFriendSet(candidate);
+            Set<User> mutual = new HashSet<>(myFriends);
+            mutual.retainAll(candidateFriends);
+            if (mutual.isEmpty()) {
+                Set<String> sportsCurrent = new HashSet<>(currentUser.getSports());
+                Set<String> sportsCandidate = new HashSet<>(candidate.getSports());
+                sportsCurrent.retainAll(sportsCandidate);
+                if (sportsCurrent.size() >= 2) {
+                    suggestions.add(new FriendSuggestionResponse(
+                            candidate.getId(), candidate.getName(), candidate.getPhoto(),
+                            0, List.of()));
+                }
+            }
+        }
+
         suggestions.sort((a, b) -> b.mutualCount() - a.mutualCount());
         return suggestions;
+    }
+
+    private Set<User> buildFriendSet(User user) {
+        Set<User> friends = new HashSet<>();
+        friendRequestRepository.findByReceiverAndStatus(user, RequestStatus.ACCEPTED)
+                .forEach(fr -> friends.add(fr.getSender()));
+        friendRequestRepository.findBySenderAndStatus(user, RequestStatus.ACCEPTED)
+                .forEach(fr -> friends.add(fr.getReceiver()));
+        return friends;
     }
 }

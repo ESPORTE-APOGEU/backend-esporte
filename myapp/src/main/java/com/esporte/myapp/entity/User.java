@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -29,4 +31,15 @@ public class User {
     // Nova coluna para avatar/foto do usuário
     @Column(length = 255)
     private String photo;
+
+    @ElementCollection
+    private Set<String> sports = new HashSet<>();
+
+    public Set<String> getSports() {
+        return sports;
+    }
+
+    public void setSports(Set<String> sports) {
+        this.sports = sports;
+    }
 }

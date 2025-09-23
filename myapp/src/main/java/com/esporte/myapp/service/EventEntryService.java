@@ -68,18 +68,21 @@ public class EventEntryService {
                 .orElseThrow(() -> new RuntimeException("Pedido de entrada não encontrado"));
         entry.setStatus("ACCEPTED");
         repo.save(entry);
-        // Enviar notificação para o usuário solicitante
         User participant = entry.getUser();
         Event event = repository.findById(entry.getEventId())
                 .orElseThrow(() -> new RuntimeException("Evento não encontrado"));
+
         Notification notification = new Notification();
         notification.setUser(participant);
         notification.setType("entry_accepted");
-        notification.setIconName("info"); // EXISTENTE no front
-        notification.setTitle("Entrada aceita!");
-        notification.setDescription("Você foi aceito no evento: " + event.getName());
+        notification.setIconName("whatsapp"); // alterado para whatsapp
+        notification.setTitle("Você foi aceito no evento!");
+        // Antes: "Você foi aceito no evento \"" + event.getName() + "\"!"
+        notification.setDescription("Você foi aceito no evento " + event.getName() + "!");
         notification.setTimestamp(LocalDateTime.now());
         notification.setRelatedEventId(event.getId());
+        notification.setEntryId(entry.getId());
+
         notificationRepository.save(notification);
     }
 
@@ -133,7 +136,6 @@ public class EventEntryService {
         entry.setStatus("DECLINED");
         repo.save(entry);
 
-        // notificação para o solicitante
         User participant = entry.getUser();
         Event event = repository.findById(entry.getEventId())
             .orElseThrow(() -> new RuntimeException("Evento não encontrado"));
@@ -143,9 +145,10 @@ public class EventEntryService {
         notif.setType("entry_declined");
         notif.setIconName("info");
         notif.setTitle("Pedido recusado");
-        notif.setDescription("Seu pedido de entrada no evento “" + event.getName() + "” foi recusado.");
+        notif.setDescription("Seu pedido de entrada no evento \"" + event.getName() + "\" foi recusado.");
         notif.setTimestamp(LocalDateTime.now());
         notif.setRelatedEventId(event.getId());
-        notificationRepository.save(notif);
+        notif.setEntryId(entry.getId());
+        notificationRepository.save(notif); // FALTAVA
     }
 }
