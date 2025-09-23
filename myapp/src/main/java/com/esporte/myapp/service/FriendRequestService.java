@@ -1,8 +1,8 @@
 package com.esporte.myapp.service;
 
 import com.esporte.myapp.entity.FriendRequest;
-import com.esporte.myapp.enums.RequestStatus;
 import com.esporte.myapp.entity.User;
+import com.esporte.myapp.enums.RequestStatus;
 import com.esporte.myapp.repository.FriendRequestRepository;
 import com.esporte.myapp.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -39,9 +39,13 @@ public class FriendRequestService {
         return friendRequestRepository.findByReceiverAndStatus(receiver, RequestStatus.PENDING);
     }
 
-    public FriendRequest respondToRequest(String requestId, RequestStatus status) {
+    public FriendRequest respondToRequest(String currentUserId, String requestId, RequestStatus status) {
         FriendRequest request = friendRequestRepository.findById(requestId)
                 .orElseThrow(() -> new EntityNotFoundException("Request not found"));
+
+        if (!request.getReceiver().getId().equals(currentUserId)) {
+            throw new IllegalStateException("User is not authorized to respond to this request");
+        }
 
         request.setStatus(status);
         return friendRequestRepository.save(request);
