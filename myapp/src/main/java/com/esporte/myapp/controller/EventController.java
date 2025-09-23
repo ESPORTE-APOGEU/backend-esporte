@@ -3,6 +3,7 @@ package com.esporte.myapp.controller;
 import com.esporte.myapp.dto.EventRequest;
 import com.esporte.myapp.dto.EventResponse;
 import com.esporte.myapp.dto.EventFilterRequest;
+import com.esporte.myapp.dto.UserEventItemResponse;
 import com.esporte.myapp.service.EventService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -51,4 +52,18 @@ public class EventController {
         return service.searchUpcomingByAnyField(query);
     }
 
+    // ↓↓↓ NOVOS ENDPOINTS PARA O APP
+    @GetMapping("/me/registered")
+    public List<UserEventItemResponse> myRegistered(@AuthenticationPrincipal Jwt jwt) {
+        String userId = (jwt != null) ? jwt.getSubject() : null;
+        if (userId == null) throw new RuntimeException("Unauthorized");
+        return service.getMyRegisteredEvents(userId);
+    }
+
+    @GetMapping("/me/participated")
+    public List<UserEventItemResponse> myParticipated(@AuthenticationPrincipal Jwt jwt) {
+        String userId = (jwt != null) ? jwt.getSubject() : null;
+        if (userId == null) throw new RuntimeException("Unauthorized");
+        return service.getMyParticipatedEvents(userId);
+    }
 }

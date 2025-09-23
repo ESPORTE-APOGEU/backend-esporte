@@ -28,7 +28,25 @@ public class EventEntryController {
         String userId = (jwt != null) ? jwt.getSubject() : null;
         if (userId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
-        EventEntryResponse res = service.requestEntry(userId, req.eventId());
+        String nameFromJwt =
+                firstNonBlank(
+                        jwt.getClaimAsString("full_name"),
+                        jwt.getClaimAsString("name"),
+                        jwt.getClaimAsString("first_name")
+                );
+        String email = jwt.getClaimAsString("email");
+        if (!hasText(nameFromJwt) && hasText(email)) {
+            nameFromJwt = email.split("@")[0];
+        }
+
+        String photoFromJwt =
+                firstNonBlank(
+                        jwt.getClaimAsString("picture"),
+                        jwt.getClaimAsString("image_url"),
+                        jwt.getClaimAsString("avatar")
+                );
+
+        EventEntryResponse res = service.requestEntry(userId, req.eventId(), nameFromJwt, photoFromJwt);
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
 
@@ -71,5 +89,11 @@ public class EventEntryController {
         return res.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.noContent().build());
     }
 
-
+    private static boolean hasText(String s) {
+        return s != null && !s.isBlank();
+    }
+    private static String firstNonBlank(String... vals) {
+        for (String v : vals) if (hasText(v)) return v;
+        return null;
+    }
 }

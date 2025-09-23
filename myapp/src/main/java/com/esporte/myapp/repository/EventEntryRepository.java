@@ -3,6 +3,8 @@ package com.esporte.myapp.repository;
 import com.esporte.myapp.entity.EventEntry;
 import com.esporte.myapp.enums.RequestStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,4 +21,13 @@ public interface EventEntryRepository extends JpaRepository<EventEntry, Long> {
 
     Optional<EventEntry> findFirstByUser_IdAndEvent_Id(String userId, Long eventId);
 
+    @Query("""
+           select ee
+           from EventEntry ee
+           join fetch ee.event e
+           where ee.user.id = :userId
+             and ee.status = :status
+           """)
+    List<EventEntry> findByUserIdAndStatusFetchEvent(@Param("userId") String userId,
+                                                     @Param("status") RequestStatus status);
 }

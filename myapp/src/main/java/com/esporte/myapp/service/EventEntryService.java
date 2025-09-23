@@ -25,7 +25,9 @@ public class EventEntryService {
     private final UserRepository userRepo;
     private final NotificationService notificationService;
 
-    public EventEntryResponse requestEntry(String requesterId, Long eventId) {
+    public EventEntryResponse requestEntry(String requesterId, Long eventId,
+                                           String requesterNameFromJwt,
+                                           String requesterPhotoFromJwt) {
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new EntityNotFoundException("Evento não encontrado"));
 
@@ -55,7 +57,14 @@ public class EventEntryService {
         entry.setUser(requester);
         entry.setRequestedAt(LocalDateTime.now());
         entry.setStatus(RequestStatus.PENDING);
+        String fallbackName = hasText(requester.getName())
+                ? requester.getName()
+                : (requester.getEmail() != null ? requester.getEmail().split("@")[0] : "Usuário");
 
+        entry.setRequesterName(hasText(requesterNameFromJwt) ? requesterNameFromJwt : fallbackName);
+
+        String finalPhoto = hasText(requesterPhotoFromJwt) ? requesterPhotoFromJwt : requester.getPhoto();
+        entry.setRequesterPhoto(finalPhoto);
         entry = entryRepo.save(entry);
 
         // Notifica o organizador
@@ -64,12 +73,13 @@ public class EventEntryService {
                     event.getCreator().getId(),
                     "entry_request",
                     "Pedido de entrada",
-                    "Um usuário solicitou entrada no evento: " + event.getName(),
+                    "quer participar do evento",
                     "info",
                     null,
                     null,
                     event.getId(),
                     entry.getId()
+
             );
         }
 
@@ -165,5 +175,13 @@ public class EventEntryService {
         if (max == null) return false;
         long accepted = entryRepo.countByEvent_IdAndStatus(event.getId(), RequestStatus.ACCEPTED);
         return accepted >= max;
+    }
+
+    private static boolean hasText(String s) {
+        return s != null && !s.isBlank();
+    }
+    private static String firstNonBlank(String... vals) {
+        for (String v : vals) if (hasText(v)) return v;
+        return null;
     }
 }

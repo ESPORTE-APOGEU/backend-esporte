@@ -34,6 +34,12 @@ public class EventEntry {
     @Column(name = "status") // ajuste para o nome real da coluna se for diferente
     private RequestStatus status; // Ex.: "PENDING", "ACCEPTED", "DECLINED"
 
+    @Column(name = "requester_name", length = 120)
+    private String requesterName;
+
+    @Column(name = "requester_photo", length = 500)
+    private String requesterPhoto;
+
     @PrePersist
     public void prePersist() {
         if (requestedAt == null) requestedAt = LocalDateTime.now();

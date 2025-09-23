@@ -3,8 +3,12 @@ package com.esporte.myapp.service;
 import com.esporte.myapp.dto.EventRequest;
 import com.esporte.myapp.dto.EventResponse;
 import com.esporte.myapp.dto.EventFilterRequest;
+import com.esporte.myapp.dto.UserEventItemResponse;
 import com.esporte.myapp.entity.Event;
+import com.esporte.myapp.entity.EventEntry;
 import com.esporte.myapp.entity.User;
+import com.esporte.myapp.enums.RequestStatus;
+import com.esporte.myapp.repository.EventEntryRepository;
 import com.esporte.myapp.repository.EventRepository;
 import com.esporte.myapp.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -14,6 +18,11 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -23,6 +32,7 @@ public class EventService {
     private final EventRepository repo;
     private final SearchService searchService;
     private final UserRepository userRepo;
+    private final EventEntryRepository eventEntryRepository;
 
 
     public List<EventResponse> getUpcomingEvents() {
@@ -138,6 +148,70 @@ public class EventService {
                 .stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+
+    @Transactional(readOnly = true)
+    public List<UserEventItemResponse> getMyRegisteredEvents(String userId) {
+        List<EventEntry> accepted = eventEntryRepository
+                .findByUserIdAndStatusFetchEvent(userId, RequestStatus.ACCEPTED);
+
+        LocalDate today = LocalDate.now();
+        LocalTime now   = LocalTime.now();
+
+        return accepted.stream()
+                .map(EventEntry::getEvent)
+                .filter(e -> isUpcoming(e, today, now))
+                .sorted(Comparator
+                        .comparing(Event::getDate, Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(Event::getStartTime, Comparator.nullsLast(Comparator.naturalOrder())))
+                .map(UserEventItemResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserEventItemResponse> getMyParticipatedEvents(String userId) {
+        List<EventEntry> accepted = eventEntryRepository
+                .findByUserIdAndStatusFetchEvent(userId, RequestStatus.ACCEPTED);
+
+        LocalDate today = LocalDate.now();
+        LocalTime now   = LocalTime.now();
+
+        return accepted.stream()
+                .map(EventEntry::getEvent)
+                .filter(e -> isPast(e, today, now))
+                .sorted(Comparator
+                        .comparing(Event::getDate, Comparator.nullsLast(Comparator.reverseOrder()))
+                        .thenComparing(Event::getEndTime, Comparator.nullsLast(Comparator.reverseOrder()))
+                        .thenComparing(Event::getStartTime, Comparator.nullsLast(Comparator.reverseOrder())))
+                .map(UserEventItemResponse::from)
+                .toList();
+    }
+
+    // ——— helpers ———
+
+    // “ainda não aconteceu”: (date > hoje) ou (date == hoje e startTime >= agora ou startTime null)
+    private boolean isUpcoming(Event e, LocalDate today, LocalTime now) {
+        if (e.getDate() == null) return false;
+        if (e.getDate().isAfter(today)) return true;
+        if (e.getDate().isEqual(today)) {
+            LocalTime start = e.getStartTime();
+            return (start == null) || !start.isBefore(now);
+        }
+        return false;
+    }
+
+    // “já aconteceu”: (date < hoje) ou (date == hoje e fim < agora) ou (sem fim e início < agora)
+    private boolean isPast(Event e, LocalDate today, LocalTime now) {
+        if (e.getDate() == null) return false;
+        if (e.getDate().isBefore(today)) return true;
+        if (e.getDate().isEqual(today)) {
+            LocalTime end = e.getEndTime();
+            LocalTime start = e.getStartTime();
+            if (end != null) return end.isBefore(now);
+            return start != null && start.isBefore(now);
+        }
+        return false;
     }
 
 }
