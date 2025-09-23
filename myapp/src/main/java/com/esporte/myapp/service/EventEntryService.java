@@ -25,6 +25,7 @@ public class EventEntryService {
     private final UserRepository userRepo;
     private final NotificationService notificationService;
 
+    @Transactional
     public EventEntryResponse requestEntry(String requesterId, Long eventId,
                                            String requesterNameFromJwt,
                                            String requesterPhotoFromJwt) {
@@ -85,7 +86,7 @@ public class EventEntryService {
 
         return EventEntryResponse.from(entry);
     }
-
+    @Transactional
     public void acceptEntry(Long entryId, String organizerId) {
         EventEntry entry = entryRepo.findById(entryId)
                 .orElseThrow(() -> new EntityNotFoundException("Pedido de entrada não encontrado"));
@@ -130,7 +131,7 @@ public class EventEntryService {
 
     // Pode-se adicionar também um método para recusar a entrada (declineEntry)
 
-
+    @Transactional
     public void declineEntry(Long entryId, String organizerId) {
         EventEntry entry = entryRepo.findById(entryId)
                 .orElseThrow(() -> new EntityNotFoundException("Pedido de entrada não encontrado"));
