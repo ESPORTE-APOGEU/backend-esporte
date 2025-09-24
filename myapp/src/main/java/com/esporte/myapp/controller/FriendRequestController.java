@@ -1,6 +1,6 @@
 package com.esporte.myapp.controller;
 
-import com.esporte.myapp.entity.FriendRequest;
+import com.esporte.myapp.dto.FriendRequestResponse;
 import com.esporte.myapp.entity.RequestStatus;
 import com.esporte.myapp.service.FriendRequestService;
 import lombok.RequiredArgsConstructor;
@@ -17,20 +17,17 @@ public class FriendRequestController {
     private final FriendRequestService friendRequestService;
 
     @PostMapping
-    public ResponseEntity<FriendRequest> createRequest(@RequestParam Long senderId, @RequestParam Long receiverId) {
-        FriendRequest request = friendRequestService.createFriendRequest(senderId, receiverId);
-        return ResponseEntity.ok(request);
+    public ResponseEntity<FriendRequestResponse> createRequest(@RequestParam Long senderId, @RequestParam Long receiverId) {
+        return ResponseEntity.ok(friendRequestService.createFriendRequest(senderId, receiverId));
     }
 
     @GetMapping("/pending/{receiverId}")
-    public ResponseEntity<List<FriendRequest>> getPendingRequests(@PathVariable Long receiverId) {
-        List<FriendRequest> requests = friendRequestService.getPendingRequests(receiverId);
-        return ResponseEntity.ok(requests);
+    public ResponseEntity<List<FriendRequestResponse>> getPendingRequests(@PathVariable Long receiverId) {
+        return ResponseEntity.ok(friendRequestService.getPendingRequests(receiverId));
     }
 
     @PostMapping("/{requestId}/respond")
-    public ResponseEntity<FriendRequest> respondToRequest(@PathVariable Long requestId, @RequestParam RequestStatus status) {
-        FriendRequest request = friendRequestService.respondToRequest(requestId, status);
-        return ResponseEntity.ok(request);
+    public ResponseEntity<FriendRequestResponse> respondToRequest(@PathVariable Long requestId, @RequestParam RequestStatus status) {
+        return ResponseEntity.ok(friendRequestService.respondToRequest(requestId, status));
     }
 }

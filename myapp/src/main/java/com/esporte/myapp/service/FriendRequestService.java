@@ -1,5 +1,6 @@
 package com.esporte.myapp.service;
 
+import com.esporte.myapp.dto.FriendRequestResponse;
 import com.esporte.myapp.entity.FriendRequest;
 import com.esporte.myapp.entity.RequestStatus;
 import com.esporte.myapp.entity.User;
@@ -18,7 +19,7 @@ public class FriendRequestService {
     private final FriendRequestRepository friendRequestRepository;
     private final UserRepository userRepository;
 
-    public FriendRequest createFriendRequest(Long senderId, Long receiverId) {
+    public FriendRequestResponse createFriendRequest(Long senderId, Long receiverId) {
         User sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new EntityNotFoundException("Sender not found"));
         User receiver = userRepository.findById(receiverId)
@@ -28,22 +29,26 @@ public class FriendRequestService {
         request.setSender(sender);
         request.setReceiver(receiver);
         request.setStatus(RequestStatus.PENDING);
-
-        return friendRequestRepository.save(request);
+        request = friendRequestRepository.save(request);
+        return FriendRequestResponse.from(request);
     }
 
-    public List<FriendRequest> getPendingRequests(Long receiverId) {
+    public List<FriendRequestResponse> getPendingRequests(Long receiverId) {
         User receiver = userRepository.findById(receiverId)
                 .orElseThrow(() -> new EntityNotFoundException("Receiver not found"));
 
-        return friendRequestRepository.findByReceiverAndStatus(receiver, RequestStatus.PENDING);
+        return friendRequestRepository.findByReceiverAndStatus(receiver, RequestStatus.PENDING)
+                .stream()
+                .map(FriendRequestResponse::from)
+                .toList();
     }
 
-    public FriendRequest respondToRequest(Long requestId, RequestStatus status) {
+    public FriendRequestResponse respondToRequest(Long requestId, RequestStatus status) {
         FriendRequest request = friendRequestRepository.findById(requestId)
                 .orElseThrow(() -> new EntityNotFoundException("Request not found"));
 
         request.setStatus(status);
-        return friendRequestRepository.save(request);
+        request = friendRequestRepository.save(request);
+        return FriendRequestResponse.from(request);
     }
 }

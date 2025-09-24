@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -31,5 +32,10 @@ public class UserController {
     @GetMapping("/{id}")
     public UserResponse get(@PathVariable Long id) {
         return service.get(id);
+    }
+
+    @PatchMapping("/{id}/sports")
+    public UserResponse updateSports(@PathVariable Long id, @RequestBody Set<String> sports) {
+        return service.updateSports(id, sports);
     }
 }

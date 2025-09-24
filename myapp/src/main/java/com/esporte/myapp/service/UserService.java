@@ -8,6 +8,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -41,10 +42,17 @@ public class UserService {
     }
 
     private UserResponse toResponse(User u) {
-        return new UserResponse(u.getId(), u.getName(), u.getEmail(), u.getCreatedAt());
+        return new UserResponse(u.getId(), u.getName(), u.getEmail(), u.getCreatedAt(), u.getPhoto());
     }
 
     public List<UserResponse> listAll() {
         return repo.findAll().stream().map(this::toResponse).collect(Collectors.toList());
+    }
+
+    public UserResponse updateSports(Long id, Set<String> sports) {
+        User u = repo.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        u.setSports(sports);
+        repo.save(u);
+        return UserResponse.from(u);
     }
 }

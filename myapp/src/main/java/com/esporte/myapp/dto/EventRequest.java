@@ -9,11 +9,12 @@ public record EventRequest(
     String sport,
     String level,
     String gender,
-    LocalDate date,
-    LocalTime startTime,
-    LocalTime endTime,
-    java.math.BigDecimal price,
+    java.time.LocalDate date,
+    java.time.LocalTime startTime,
+    java.time.LocalTime endTime,
+    Double price,
     String description,
     Long organizerId,
-    String organizerPhoto
+    String organizerPhoto,
+    Integer capacity // novo
 ) {}

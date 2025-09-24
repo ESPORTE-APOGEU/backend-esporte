@@ -1,14 +1,11 @@
 package com.esporte.myapp.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 @Entity
 @Table(name = "events")
-@NoArgsConstructor
-@AllArgsConstructor
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,11 +19,12 @@ public class Event {
     private LocalDate date;
     private LocalTime startTime;
     private LocalTime endTime;
-    private BigDecimal price;
+    private Double price;
     private String description;
     private Long organizerId;
     private String organizerPhoto;
-
+    @Column(name = "capacity")
+    private Integer capacity;
 
     public Long getId() {
         return id;
@@ -100,11 +98,11 @@ public class Event {
         this.endTime = endTime;
     }
 
-    public BigDecimal getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(BigDecimal price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
@@ -131,4 +129,7 @@ public class Event {
     public void setOrganizerPhoto(String organizerPhoto) {
         this.organizerPhoto = organizerPhoto;
     }
+
+    public Integer getCapacity() { return capacity; }
+    public void setCapacity(Integer capacity) { this.capacity = capacity; }
 }

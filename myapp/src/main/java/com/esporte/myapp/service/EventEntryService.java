@@ -5,6 +5,7 @@ import com.esporte.myapp.dto.EventEntryResponse;
 import com.esporte.myapp.dto.EventRequest;
 import com.esporte.myapp.dto.EventResponse;
 import com.esporte.myapp.dto.UserResponse;
+import com.esporte.myapp.dto.RemainingSlotsResponse;
 import com.esporte.myapp.entity.EventEntry;
 import com.esporte.myapp.entity.Event;
 import com.esporte.myapp.entity.Notification;
@@ -15,8 +16,11 @@ import com.esporte.myapp.repository.NotificationRepository;
 import com.esporte.myapp.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -63,41 +67,66 @@ public class EventEntryService {
     }
 
     // Novo método para o organizador aceitar o pedido
+    @Transactional
     public void acceptEntry(Long entryId) {
         EventEntry entry = repo.findById(entryId)
                 .orElseThrow(() -> new RuntimeException("Pedido de entrada não encontrado"));
         entry.setStatus("ACCEPTED");
         repo.save(entry);
+
         User participant = entry.getUser();
         Event event = repository.findById(entry.getEventId())
                 .orElseThrow(() -> new RuntimeException("Evento não encontrado"));
 
+        // remove a notificação de pedido do organizador
+        notificationRepository.deleteByEntryIdAndTypeAndUser_Id(entryId, "entry_request", event.getOrganizerId());
+
         Notification notification = new Notification();
         notification.setUser(participant);
         notification.setType("entry_accepted");
-        notification.setIconName("whatsapp"); // alterado para whatsapp
+        notification.setIconName("whatsapp");
         notification.setTitle("Você foi aceito no evento!");
-        // Antes: "Você foi aceito no evento \"" + event.getName() + "\"!"
         notification.setDescription("Você foi aceito no evento " + event.getName() + "!");
         notification.setTimestamp(LocalDateTime.now());
         notification.setRelatedEventId(event.getId());
         notification.setEntryId(entry.getId());
-
         notificationRepository.save(notification);
     }
 
     // Pode-se adicionar também um método para recusar a entrada (declineEntry)
 
     public EventResponse create(EventRequest req) {
-        Event event = new Event(
-            null,
-            req.name(), req.location(), req.sport(), req.level(), req.gender(),
-            req.date(), req.startTime(), req.endTime(),
-            req.price(), req.description(),
-            req.organizerId(), req.organizerPhoto()
-        );
-        event = repository.save(event);
-        return EventResponse.from(event);
+        if (req == null) throw new IllegalArgumentException("Corpo da requisição é obrigatório");
+        if (req.name() == null || req.name().isBlank()) throw new IllegalArgumentException("name é obrigatório");
+        if (req.location() == null || req.location().isBlank()) throw new IllegalArgumentException("location é obrigatório");
+        // date e times são tipos java.time, então valide apenas null
+        if (req.date() == null) throw new IllegalArgumentException("date é obrigatório");
+        if (req.startTime() == null) throw new IllegalArgumentException("startTime é obrigatório");
+
+        Event e = new Event();
+        e.setName(req.name());
+        e.setLocation(req.location());
+        e.setSport(req.sport());
+        e.setLevel(req.level());
+        e.setGender(req.gender());
+        e.setDescription(req.description());
+        e.setPrice(req.price());
+        e.setOrganizerId(req.organizerId());
+        e.setOrganizerPhoto(req.organizerPhoto());
+
+        // Campos já vêm como LocalDate/LocalTime
+        e.setDate(req.date());
+        if (req.startTime() != null) e.setStartTime(req.startTime());
+        if (req.endTime() != null) e.setEndTime(req.endTime());
+
+        // capacidade definida na criação (se enviada)
+        if (req.capacity() != null) {
+            e.setCapacity(req.capacity());
+        }
+
+        // capacity pode ser definido depois via PATCH /events/{id}/capacity
+        e = repository.save(e);
+        return EventResponse.from(e);
     }
 
     public EventResponse get(Long id) {
@@ -113,12 +142,14 @@ public class EventEntryService {
                          .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<UserResponse> getParticipants(Long eventId) {
-        List<EventEntry> entries = repo.findByEventIdAndStatus(eventId, "ACCEPTED");
+        // Busca com fetch join para inicializar User dentro da transação
+        List<EventEntry> entries = repo.findByEventIdAndStatusFetchUser(eventId, "ACCEPTED");
         return entries.stream()
             .map(e -> {
                 var u = e.getUser();
-                return new UserResponse(u.getId(), u.getName(), u.getEmail(), u.getCreatedAt());
+                return new UserResponse(u.getId(), u.getName(), u.getEmail(), u.getCreatedAt(), u.getPhoto());
             })
             .collect(Collectors.toList());
     }
@@ -140,6 +171,9 @@ public class EventEntryService {
         Event event = repository.findById(entry.getEventId())
             .orElseThrow(() -> new RuntimeException("Evento não encontrado"));
 
+        // remove a notificação de pedido do organizador
+        notificationRepository.deleteByEntryIdAndTypeAndUser_Id(entryId, "entry_request", event.getOrganizerId());
+
         Notification notif = new Notification();
         notif.setUser(participant);
         notif.setType("entry_declined");
@@ -149,6 +183,23 @@ public class EventEntryService {
         notif.setTimestamp(LocalDateTime.now());
         notif.setRelatedEventId(event.getId());
         notif.setEntryId(entry.getId());
-        notificationRepository.save(notif); // FALTAVA
+        notificationRepository.save(notif);
+    }
+
+    public com.esporte.myapp.dto.RemainingSlotsResponse getRemainingSlots(Long eventId) {
+        Event event = repository.findById(eventId)
+            .orElseThrow(() -> new RuntimeException("Evento não encontrado"));
+        int capacity = event.getCapacity() != null ? event.getCapacity() : 10;
+        int accepted = repo.findByEventIdAndStatus(eventId, "ACCEPTED").size();
+        int remaining = Math.max(capacity - accepted, 0);
+        return new RemainingSlotsResponse(capacity, remaining);
+    }
+
+    public com.esporte.myapp.dto.RemainingSlotsResponse updateCapacity(Long eventId, Integer capacity) {
+        Event event = repository.findById(eventId)
+            .orElseThrow(() -> new RuntimeException("Evento não encontrado"));
+        event.setCapacity(capacity);
+        repository.save(event);
+        return getRemainingSlots(eventId);
     }
 }

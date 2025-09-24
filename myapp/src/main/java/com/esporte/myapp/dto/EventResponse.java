@@ -163,7 +163,7 @@ public class EventResponse {
         resp.setDate(event.getDate());
         resp.setStartTime(event.getStartTime());
         resp.setEndTime(event.getEndTime());
-        resp.setPrice(event.getPrice());
+        resp.setPrice(event.getPrice() != null ? BigDecimal.valueOf(event.getPrice()) : null);
         resp.setDescription(event.getDescription());
         resp.setOrganizerId(event.getOrganizerId());
         resp.setOrganizerPhoto(event.getOrganizerPhoto());

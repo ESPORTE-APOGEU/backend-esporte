@@ -3,6 +3,7 @@ package com.esporte.myapp.controller;
 
 import com.esporte.myapp.dto.EventRequest;
 import com.esporte.myapp.dto.EventResponse;
+import com.esporte.myapp.dto.RemainingSlotsResponse;
 import com.esporte.myapp.dto.UserResponse;
 import com.esporte.myapp.service.EventEntryService;
 import jakarta.validation.Valid;
@@ -42,5 +43,15 @@ public class EventController {
     @GetMapping("/{id}/participants")
     public List<UserResponse> getParticipants(@PathVariable("id") Long id) {
         return service.getParticipants(id);
+    }
+
+    @GetMapping("/{id}/remaining-slots")
+    public RemainingSlotsResponse getRemainingSlots(@PathVariable Long id) {
+        return service.getRemainingSlots(id);
+    }
+
+    @PatchMapping("/{id}/capacity")
+    public RemainingSlotsResponse updateCapacity(@PathVariable Long id, @RequestParam Integer value) {
+        return service.updateCapacity(id, value);
     }
 }

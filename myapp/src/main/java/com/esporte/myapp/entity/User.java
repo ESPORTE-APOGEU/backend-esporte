@@ -32,7 +32,9 @@ public class User {
     @Column(length = 255)
     private String photo;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_sports", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "sports")
     private Set<String> sports = new HashSet<>();
 
     public Set<String> getSports() {
