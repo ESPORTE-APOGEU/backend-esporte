@@ -18,5 +18,6 @@ public record EventResponse(
         String description,
         String organizerId,
         String organizerName,
-        String organizerPhoto
+        String organizerPhoto,
+        String coverImageUrl
 ) {}

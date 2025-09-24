@@ -40,6 +40,8 @@ public class Event {
 
     @Column(name = "min_participants")
     private int minParticipants;
+    @Column(name = "cover_image_url", length = 500)
+    private String coverImageUrl;
 
     @Column(name = "max_participants")
     private int maxParticipants;

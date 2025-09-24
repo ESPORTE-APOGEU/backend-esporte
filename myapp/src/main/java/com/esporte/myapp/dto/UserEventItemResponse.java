@@ -15,7 +15,9 @@ public record UserEventItemResponse(
         String startTime,  // HH:mm:ss
         String endTime,    // HH:mm:ss
         BigDecimal price,
-        String description
+        String description,
+        String coverImageUrl
+
 ) {
     public static UserEventItemResponse from(Event e) {
         return new UserEventItemResponse(
@@ -29,7 +31,8 @@ public record UserEventItemResponse(
                 e.getStartTime() != null ? e.getStartTime().toString() : null,
                 e.getEndTime() != null ? e.getEndTime().toString() : null,
                 e.getPrice(),
-                e.getDescription()
+                e.getDescription(),
+                e.getCoverImageUrl()
         );
     }
 }

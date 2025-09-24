@@ -82,6 +82,7 @@ public class EventService {
         e.setPrivate(req.isPrivate());
         e.setMinParticipants(req.minParticipants());
         e.setMaxParticipants(req.maxParticipants());
+        e.setCoverImageUrl(req.coverImageUrl());
 
         // Só cria o ponto se vier latitude/longitude
         if (req.latitude() != null && req.longitude() != null) {
@@ -147,7 +148,8 @@ public class EventService {
                 e.getDescription(),
                 organizerId,
                 organizerName,
-                organizerPhoto
+                organizerPhoto,
+                e.getCoverImageUrl()
         );
     }
 
@@ -165,11 +167,21 @@ public class EventService {
         List<EventEntry> accepted = eventEntryRepository
                 .findByUserIdAndStatusFetchEvent(userId, RequestStatus.ACCEPTED);
 
+        List<Event> mineAsOrganizer = repo.findByCreator_Id(userId);
+
         LocalDate today = LocalDate.now();
         LocalTime now   = LocalTime.now();
 
-        return accepted.stream()
-                .map(EventEntry::getEvent)
+        // concatena: (sou participante aceito) + (sou organizador)
+        return java.util.stream.Stream.concat(
+                        accepted.stream().map(EventEntry::getEvent),
+                        mineAsOrganizer.stream()
+                )
+                // dedup por ID (como entidades JPA diferentes podem ser instâncias distintas)
+                .collect(java.util.stream.Collectors.toMap(
+                        Event::getId, e -> e, (a, b) -> a
+                ))
+                .values().stream()
                 .filter(e -> isUpcoming(e, today, now))
                 .sorted(Comparator
                         .comparing(Event::getDate, Comparator.nullsLast(Comparator.naturalOrder()))
@@ -183,11 +195,19 @@ public class EventService {
         List<EventEntry> accepted = eventEntryRepository
                 .findByUserIdAndStatusFetchEvent(userId, RequestStatus.ACCEPTED);
 
+        List<Event> mineAsOrganizer = repo.findByCreator_Id(userId);
+
         LocalDate today = LocalDate.now();
         LocalTime now   = LocalTime.now();
 
-        return accepted.stream()
-                .map(EventEntry::getEvent)
+        return java.util.stream.Stream.concat(
+                        accepted.stream().map(EventEntry::getEvent),
+                        mineAsOrganizer.stream()
+                )
+                .collect(java.util.stream.Collectors.toMap(
+                        Event::getId, e -> e, (a, b) -> a
+                ))
+                .values().stream()
                 .filter(e -> isPast(e, today, now))
                 .sorted(Comparator
                         .comparing(Event::getDate, Comparator.nullsLast(Comparator.reverseOrder()))
@@ -247,6 +267,7 @@ public class EventService {
         if (e.getDate().isAfter(today)) return true;
         if (e.getDate().isEqual(today)) {
             LocalTime start = e.getStartTime();
+            System.out.println( e.getName() +" " + !start.isBefore(now));
             return (start == null) || !start.isBefore(now);
         }
         return false;

@@ -22,5 +22,6 @@ public record EventRequest(
         String whatsappLink,
         boolean isPrivate,
         @NotNull @Min(1) Integer minParticipants,
-        @NotNull @Min(1) Integer maxParticipants
+        @NotNull @Min(1) Integer maxParticipants,
+        String coverImageUrl
 ) {}

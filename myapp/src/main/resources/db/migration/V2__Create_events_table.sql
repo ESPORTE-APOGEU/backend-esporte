@@ -11,6 +11,7 @@ CREATE TABLE events (
                         price               NUMERIC(10, 2)  NOT NULL,
                         description         TEXT,
                         whatsapp_link       VARCHAR(255),
+                        cover_image_url       VARCHAR(500),
                         is_private          BOOLEAN         NOT NULL DEFAULT FALSE,
                         min_participants    INTEGER         NOT NULL,
                         max_participants    INTEGER         NOT NULL,

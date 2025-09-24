@@ -40,4 +40,6 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
     """)
     Optional<Event> findByIdWithCreator(@Param("id") Long id);
 
+    List<Event> findByCreator_Id(String creatorId);
+
 }
