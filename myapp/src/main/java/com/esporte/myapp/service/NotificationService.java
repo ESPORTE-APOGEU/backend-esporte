@@ -6,6 +6,7 @@ import com.esporte.myapp.entity.Event;
 import com.esporte.myapp.entity.EventEntry;
 import com.esporte.myapp.entity.Notification;
 import com.esporte.myapp.entity.User;
+import com.esporte.myapp.enums.NotificationStatus;
 import com.esporte.myapp.repository.EventEntryRepository;
 import com.esporte.myapp.repository.EventRepository;
 import com.esporte.myapp.repository.NotificationRepository;
@@ -91,9 +92,46 @@ public class NotificationService {
     }
 
     @Transactional(readOnly = true)
+    public List<NotificationResponse> listMineActive(String userId) {
+        return repo.findByUser_IdAndStatusInOrderByTimestampDesc(
+                userId, List.of(NotificationStatus.NEW, NotificationStatus.READ)
+        ).stream().map(NotificationResponse::from).toList();
+    }
+
+    @Transactional(readOnly = true)
     public NotificationResponse getOneMine(String userId, Long id) {
         Notification n = repo.findByIdAndUser_Id(id, userId)
                 .orElseThrow(() -> new EntityNotFoundException("Notification not found"));
         return NotificationResponse.from(n);
+    }
+
+    @Transactional
+    public void markRead(Long id, String userId) {
+        Notification n = repo.findByIdAndUser_Id(id, userId)
+                .orElseThrow(() -> new EntityNotFoundException("Notification not found"));
+        if (n.getStatus() == NotificationStatus.NEW) {
+            n.setStatus(NotificationStatus.READ);
+            n.setReadAt(LocalDateTime.now());
+            repo.save(n);
+        }
+    }
+
+    @Transactional
+    public void markResolvedForEntryRequest(Long entryId) {
+        var notes = repo.findByRelatedEntry_IdAndType(entryId, "entry_request");
+        for (var n : notes) {
+            n.setStatus(NotificationStatus.RESOLVED);
+            n.setResolvedAt(LocalDateTime.now());
+        }
+        repo.saveAll(notes);
+    }
+
+    @Transactional
+    public void archive(Long id, String userId) {
+        Notification n = repo.findByIdAndUser_Id(id, userId)
+                .orElseThrow(() -> new EntityNotFoundException("Notification not found"));
+        n.setStatus(NotificationStatus.ARCHIVED);
+        n.setArchivedAt(LocalDateTime.now());
+        repo.save(n);
     }
 }

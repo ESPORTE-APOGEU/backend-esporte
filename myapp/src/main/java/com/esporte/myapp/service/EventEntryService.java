@@ -111,6 +111,8 @@ public class EventEntryService {
 
         entry.setStatus(RequestStatus.ACCEPTED);
         entryRepo.save(entry);
+        notificationService.markResolvedForEntryRequest(entryId);
+
 
         // Notifica o participante
         User participant = entry.getUser();
@@ -148,6 +150,8 @@ public class EventEntryService {
 
         entry.setStatus(RequestStatus.DECLINED);
         entryRepo.save(entry);
+        notificationService.markResolvedForEntryRequest(entryId);
+
 
         // Notifica o participante
         User participant = entry.getUser();

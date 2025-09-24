@@ -44,6 +44,7 @@ public class UserController {
     }
 
     @PutMapping("/me")
+// UserController.upsertMe(...)
     public ResponseEntity<UserResponse> upsertMe(
             @AuthenticationPrincipal Jwt jwt,
             Authentication authentication,
@@ -51,14 +52,30 @@ public class UserController {
     ) {
         String subject = (jwt != null) ? jwt.getSubject()
                 : (authentication != null ? authentication.getName() : null);
+        if (subject == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
-        if (subject == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        // tenta preencher photo com claims do Clerk se o app não mandou
+        String photoFromJwt = firstNonBlank(
+                jwt != null ? jwt.getClaimAsString("picture") : null,
+                jwt != null ? jwt.getClaimAsString("image_url") : null,
+                jwt != null ? jwt.getClaimAsString("avatar") : null
+        );
 
-        User saved = service.upsert(subject, req);
+        UserRequest fixed = new UserRequest(
+                req.id(), req.name(), req.email(), req.birthday(), req.gender(),
+                req.city(), req.sports(),
+                (req.photo() != null && !req.photo().isBlank()) ? req.photo() : photoFromJwt
+        );
+
+        User saved = service.upsert(subject, fixed);
         return ResponseEntity.ok(UserResponse.from(saved));
     }
+
+    private static String firstNonBlank(String... vals) {
+        for (String v : vals) if (v != null && !v.isBlank()) return v;
+        return null;
+    }
+
     // --- Abaixo, rotas administrativas/diagnóstico (opcionais) ---
 
     @GetMapping("/{id}")

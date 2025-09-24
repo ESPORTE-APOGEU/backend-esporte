@@ -22,10 +22,15 @@ public class NotificationController {
 
     // Lista minhas notificações
     @GetMapping
-    public List<NotificationResponse> listMine(@AuthenticationPrincipal Jwt jwt) {
+    public List<NotificationResponse> listMine(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestParam(defaultValue = "active") String scope
+    ) {
         String userId = jwt != null ? jwt.getSubject() : null;
         if (userId == null) throw new RuntimeException("Unauthorized");
-        return service.listMine(userId);
+
+        if ("all".equalsIgnoreCase(scope)) return service.listMine(userId);
+        return service.listMineActive(userId); // default: só ativas (NEW/READ)
     }
 
     // Detalhe de uma notificação minha
@@ -37,6 +42,20 @@ public class NotificationController {
         String userId = jwt != null ? jwt.getSubject() : null;
         if (userId == null) throw new RuntimeException("Unauthorized");
         return service.getOneMine(userId, id);
+    }
+    @PatchMapping("/{id}/read")
+    public ResponseEntity<Void> markRead(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
+        String userId = jwt != null ? jwt.getSubject() : null;
+        if (userId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        service.markRead(id, userId);
+        return ResponseEntity.noContent().build();
+    }
+    @PatchMapping("/{id}/archive")
+    public ResponseEntity<Void> archive(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
+        String userId = jwt != null ? jwt.getSubject() : null;
+        if (userId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        service.archive(id, userId);
+        return ResponseEntity.noContent().build();
     }
 
     // Opcional: permitir que o próprio usuário crie notificações (se fizer sentido)

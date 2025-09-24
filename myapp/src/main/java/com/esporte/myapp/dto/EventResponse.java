@@ -17,5 +17,6 @@ public record EventResponse(
         BigDecimal price,
         String description,
         String organizerId,
-        String organizerName
+        String organizerName,
+        String organizerPhoto
 ) {}

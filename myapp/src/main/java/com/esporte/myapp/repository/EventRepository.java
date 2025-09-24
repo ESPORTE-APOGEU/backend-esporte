@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecificationExecutor<Event> {
     @Query(value = """
@@ -32,5 +33,11 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
 
     List<Event> findByDateGreaterThanEqualAndDescriptionContainingIgnoreCase(LocalDate date, String description);
 
+    @Query("""
+       select e from Event e
+       join fetch e.creator c
+       where e.id = :id
+    """)
+    Optional<Event> findByIdWithCreator(@Param("id") Long id);
 
 }

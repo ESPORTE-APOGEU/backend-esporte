@@ -1,9 +1,6 @@
 package com.esporte.myapp.controller;
 
-import com.esporte.myapp.dto.EventRequest;
-import com.esporte.myapp.dto.EventResponse;
-import com.esporte.myapp.dto.EventFilterRequest;
-import com.esporte.myapp.dto.UserEventItemResponse;
+import com.esporte.myapp.dto.*;
 import com.esporte.myapp.service.EventService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -44,7 +41,7 @@ public class EventController {
 
     @GetMapping("/{id}")
     public EventResponse get(@PathVariable Long id) {
-        return service.get(id);
+        return service.getWithEvent(id);
     }
 
     @GetMapping("/search")
@@ -66,4 +63,11 @@ public class EventController {
         if (userId == null) throw new RuntimeException("Unauthorized");
         return service.getMyParticipatedEvents(userId);
     }
+
+    @GetMapping("/{id}/participants")
+    public EventParticipantsResponse participants(@PathVariable Long id,@AuthenticationPrincipal Jwt jwt) {
+        String userId = (jwt != null) ? jwt.getSubject() : null;
+        return service.getParticipants(id, userId);
+    }
+
 }

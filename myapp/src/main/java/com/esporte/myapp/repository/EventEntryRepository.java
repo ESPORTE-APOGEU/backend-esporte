@@ -30,4 +30,14 @@ public interface EventEntryRepository extends JpaRepository<EventEntry, Long> {
            """)
     List<EventEntry> findByUserIdAndStatusFetchEvent(@Param("userId") String userId,
                                                      @Param("status") RequestStatus status);
+
+    @Query("""
+      select ee from EventEntry ee
+        join fetch ee.user u
+        join fetch ee.event e
+      where e.id = :eventId and ee.status = com.esporte.myapp.enums.RequestStatus.ACCEPTED
+    """)
+    List<EventEntry> findAcceptedByEventIdFetchUser(@Param("eventId") Long eventId);
+
+
 }

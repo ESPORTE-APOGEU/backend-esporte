@@ -1,9 +1,6 @@
 package com.esporte.myapp.service;
 
-import com.esporte.myapp.dto.EventRequest;
-import com.esporte.myapp.dto.EventResponse;
-import com.esporte.myapp.dto.EventFilterRequest;
-import com.esporte.myapp.dto.UserEventItemResponse;
+import com.esporte.myapp.dto.*;
 import com.esporte.myapp.entity.Event;
 import com.esporte.myapp.entity.EventEntry;
 import com.esporte.myapp.entity.User;
@@ -105,24 +102,35 @@ public class EventService {
                 .orElseThrow(() -> new EntityNotFoundException("Event not found"));
         return toResponse(e);
     }
+    @Transactional(readOnly = true)
+    public EventResponse getWithEvent(Long id) {
+        Event e = repo.findByIdWithCreator(id)
+                .orElseThrow(() -> new EntityNotFoundException("Event not found"));
+        return toResponse(e,true);
+    }
 
-    private EventResponse toResponse(Event e) {
-        User creator = userRepo.findByid(e.getCreator().getId());
+    private EventResponse toResponse(Event e){
+        return toResponse(e, false);
+    }
+
+    private EventResponse toResponse(Event e, Boolean eager) {
+        User creator = null;
+        if(eager) {
+            creator = e.getCreator();
+        }else{
+            creator = userRepo.findByid(e.getCreator().getId());
+        }
 
         // Ajuste estes getters para o que existir na sua entidade User
         // (ex.: getFullName()/getName(), getPhotoUrl()/getAvatar(), etc.)
         String organizerId    = creator != null ? creator.getId() : null; // se seu ID for String, ok; senão toString()
         String organizerName  = null;
         String organizerPhoto = null;
-        if (creator != null) {
-            // tente primeiro um "full name" e caia para "name" se necessário
-            try {
-                organizerName = creator.getName();
-            } catch (Exception ignored) {}
-            if (organizerName == null) {
-                try { organizerName = creator.getName(); } catch (Exception ignored) {}
-            }
 
+        if (creator != null) {
+            System.out.println(creator);
+            organizerName  = safe(creator.getName());
+            organizerPhoto = safe(creator.getPhoto());   // <-- NOVO
         }
 
         return new EventResponse(
@@ -138,7 +146,8 @@ public class EventService {
                 e.getPrice(),
                 e.getDescription(),
                 organizerId,
-                organizerName
+                organizerName,
+                organizerPhoto
         );
     }
 
@@ -188,6 +197,48 @@ public class EventService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public EventParticipantsResponse getParticipants(Long eventId, String currentUserId) {
+        Event event = repo.findById(eventId)
+                .orElseThrow(() -> new EntityNotFoundException("Event not found"));
+
+        var entries = eventEntryRepository.findAcceptedByEventIdFetchUser(eventId);
+
+        // Monta os participantes (exclui o organizador)
+        var participants = entries.stream()
+                .filter(ee -> ee.getUser() != null
+                        && (event.getCreator() == null || !ee.getUser().getId().equals(event.getCreator().getId())))
+                .map(ee -> {
+                    var u = ee.getUser();
+                    // nome: atual do User; fallback para snapshot gravado na entry; fallback para prefixo do email
+                    String name = firstNonBlank(
+                            safe(u.getName()),
+                            safe(ee.getRequesterName()),
+                            (u.getEmail() != null ? u.getEmail().split("@")[0] : null)
+                    );
+
+                    // foto: atual do User; fallback para snapshot gravado na entry
+                    String photo = firstNonBlank(
+                            safe(u.getPhoto()),
+                            safe(ee.getRequesterPhoto())
+                    );
+
+                    return new ParticipantDTO(u.getId(), name, photo);
+                })
+                .toList();
+
+        long acceptedCount = eventEntryRepository.countByEvent_IdAndStatus(eventId, RequestStatus.ACCEPTED);
+        Integer max = event.getMaxParticipants(); // pode ser null
+        boolean iAmParticipant = false;
+        if (currentUserId != null) {
+            iAmParticipant = entries.stream().anyMatch(ee -> {
+                var u = ee.getUser();
+                return u != null && currentUserId.equals(u.getId());
+            });
+        }
+        return new EventParticipantsResponse(participants, max, acceptedCount, iAmParticipant);
+    }
+
     // ——— helpers ———
 
     // “ainda não aconteceu”: (date > hoje) ou (date == hoje e startTime >= agora ou startTime null)
@@ -213,5 +264,9 @@ public class EventService {
         }
         return false;
     }
-
+    private static String safe(String s) { return (s != null && !s.isBlank()) ? s : null; }
+    private static String firstNonBlank(String... vals) {
+        for (String v : vals) if (v != null && !v.isBlank()) return v;
+        return null;
+    }
 }

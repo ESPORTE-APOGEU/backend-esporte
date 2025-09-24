@@ -1,5 +1,6 @@
 package com.esporte.myapp.entity;
 
+import com.esporte.myapp.enums.NotificationStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,7 +10,9 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
-@Table(name = "notification")
+@Table(name = "notification",
+        indexes = { @Index(name = "idx_notification_user_status", columnList = "user_id,status") })
+
 public class Notification {
 
     @Id
@@ -41,6 +44,14 @@ public class Notification {
 
     @Column(length = 40)
     private String tagIcon;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private NotificationStatus status = NotificationStatus.NEW;
+
+    private LocalDateTime readAt;
+    private LocalDateTime resolvedAt;
+    private LocalDateTime archivedAt;
 
     // Relacionamentos (substituem os IDs soltos):
     @ManyToOne(fetch = FetchType.LAZY)

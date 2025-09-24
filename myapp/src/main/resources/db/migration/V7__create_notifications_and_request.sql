@@ -18,6 +18,7 @@ CREATE INDEX IF NOT EXISTS idx_event_entry_status   ON event_entry (status);
 CREATE INDEX IF NOT EXISTS idx_event_entry_req_at   ON event_entry (requested_at);
 
 -- NOTIFICATION
+-- NOTIFICATION (com os novos campos)
 CREATE TABLE IF NOT EXISTS notification (
                                             id               BIGSERIAL PRIMARY KEY,
                                             user_id          VARCHAR(191)  NOT NULL,
@@ -28,16 +29,32 @@ CREATE TABLE IF NOT EXISTS notification (
     timestamp        TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     tag_text         VARCHAR(40),
     tag_icon         VARCHAR(40),
+
+    -- novos campos de estado
+    status           VARCHAR(20)   NOT NULL DEFAULT 'NEW',
+    read_at          TIMESTAMP,
+    resolved_at      TIMESTAMP,
+    archived_at      TIMESTAMP,
+
     related_event_id BIGINT,
     entry_id         BIGINT,
 
-    CONSTRAINT fk_notification_user           FOREIGN KEY (user_id)          REFERENCES users(id)        ON DELETE CASCADE,
+    CONSTRAINT ck_notification_status CHECK (status IN ('NEW','READ','RESOLVED','ARCHIVED')),
+    CONSTRAINT fk_notification_user           FOREIGN KEY (user_id)          REFERENCES users(id)         ON DELETE CASCADE,
     CONSTRAINT fk_notification_related_event  FOREIGN KEY (related_event_id) REFERENCES events(id)        ON DELETE SET NULL,
-    CONSTRAINT fk_notification_entry          FOREIGN KEY (entry_id)         REFERENCES event_entry(id)  ON DELETE SET NULL
-    -- Se sua tabela de eventos for "events", troque o FK acima para REFERENCES events(id)
+    CONSTRAINT fk_notification_entry          FOREIGN KEY (entry_id)         REFERENCES event_entry(id)   ON DELETE SET NULL
     );
 
-CREATE INDEX IF NOT EXISTS idx_notification_user_id          ON notification (user_id);
-CREATE INDEX IF NOT EXISTS idx_notification_related_event_id ON notification (related_event_id);
-CREATE INDEX IF NOT EXISTS idx_notification_entry_id         ON notification (entry_id);
-CREATE INDEX IF NOT EXISTS idx_notification_timestamp        ON notification (timestamp);
+-- Índices
+CREATE INDEX IF NOT EXISTS idx_notification_user_id           ON notification (user_id);
+CREATE INDEX IF NOT EXISTS idx_notification_related_event_id  ON notification (related_event_id);
+CREATE INDEX IF NOT EXISTS idx_notification_entry_id          ON notification (entry_id);
+CREATE INDEX IF NOT EXISTS idx_notification_timestamp         ON notification (timestamp);
+
+-- IMPORTANTE para listMineActive (user_id + status)
+CREATE INDEX IF NOT EXISTS idx_notification_user_status ON notification (user_id, status);
+
+-- (Opcional) índice parcial para “ativas”
+-- acelera consultas scope=active (NEW/READ) sem pesar inserts de RESOLVED/ARCHIVED
+CREATE INDEX IF NOT EXISTS idx_notification_active_user ON notification (user_id)
+    WHERE status IN ('NEW','READ');

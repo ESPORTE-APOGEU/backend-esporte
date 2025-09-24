@@ -34,7 +34,10 @@ public class UserService {
         u.setBirthday(req.birthday());
         u.setGender(req.gender());
         u.setCity(req.city());
-        u.setSports(req.sports()); // <-- aqui também
+        u.setSports(req.sports());
+        if (hasText(req.photo())) { // <- só atualiza se veio algo
+            u.setPhoto(req.photo());
+        }
         return userRepository.save(u);
     }
 
@@ -64,4 +67,7 @@ public class UserService {
                 u.getPhoto()
         );
     }
+
+    private static boolean hasText(String s) { return s != null && !s.isBlank(); }
+
 }
