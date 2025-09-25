@@ -10,6 +10,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,6 +22,7 @@ public class FriendRequestService {
 
     private final FriendRequestRepository friendRequestRepository;
     private final UserRepository userRepository;
+    private final FriendshipService friendshipService;
 
     public FriendRequestResponse createFriendRequest(String senderId, String receiverId) {
         log.info("Criando solicitação de amizade de '{}' para '{}'", senderId, receiverId);
@@ -60,6 +62,7 @@ public class FriendRequestService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public FriendRequestResponse respondToRequest(String currentUserId, String requestId, RequestStatus status) {
         log.info("Processando resposta para a solicitação '{}' pelo usuário '{}' com status '{}'", requestId, currentUserId, status);
         FriendRequest request = friendRequestRepository.findById(requestId)
@@ -76,6 +79,9 @@ public class FriendRequestService {
 
         log.info("Autorização confirmada. Atualizando status da solicitação '{}' para '{}'", requestId, status);
         request.setStatus(status);
+        if (status == RequestStatus.ACCEPTED) {
+            friendshipService.createFriendship(request.getSender(), request.getReceiver());
+        }
         FriendRequest updatedRequest = friendRequestRepository.save(request);
         return FriendRequestResponse.from(updatedRequest);
     }
