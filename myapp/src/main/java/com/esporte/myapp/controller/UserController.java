@@ -1,7 +1,9 @@
 package com.esporte.myapp.controller;
 
+import com.esporte.myapp.dto.NotificationResponse;
 import com.esporte.myapp.dto.UserRequest;
 import com.esporte.myapp.dto.UserResponse;
+import com.esporte.myapp.service.NotificationService;
 import com.esporte.myapp.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService service;
+    private final NotificationService notificationService; // alias para notificações
 
     @PostMapping
     public ResponseEntity<UserResponse> create(@Valid @RequestBody UserRequest req) {
@@ -37,5 +40,10 @@ public class UserController {
     @PatchMapping("/{id}/sports")
     public UserResponse updateSports(@PathVariable Long id, @RequestBody Set<String> sports) {
         return service.updateSports(id, sports);
+    }
+
+    @GetMapping("/{id}/notifications")
+    public List<NotificationResponse> listNotifications(@PathVariable Long id) {
+        return notificationService.listByUser(id);
     }
 }
