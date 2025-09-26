@@ -1,4 +1,4 @@
--- V8__create_friendships_table.sql (Corrigido para PostgreSQL)
+-- V11__create_friendships_table.sql (Corrigido para PostgreSQL)
 
 CREATE TABLE IF NOT EXISTS friendships (
                                            user1_id    VARCHAR(120) NOT NULL,

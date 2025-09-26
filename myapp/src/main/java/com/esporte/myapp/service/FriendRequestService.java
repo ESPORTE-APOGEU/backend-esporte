@@ -3,8 +3,10 @@ package com.esporte.myapp.service;
 import com.esporte.myapp.dto.FriendRequestResponse;
 import com.esporte.myapp.entity.FriendRequest;
 import com.esporte.myapp.entity.User;
+import com.esporte.myapp.enums.FriendshipStatus;
 import com.esporte.myapp.enums.RequestStatus;
 import com.esporte.myapp.repository.FriendRequestRepository;
+import com.esporte.myapp.repository.FriendshipRepository;
 import com.esporte.myapp.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ public class FriendRequestService {
     private final FriendRequestRepository friendRequestRepository;
     private final UserRepository userRepository;
     private final FriendshipService friendshipService;
+    private final FriendshipRepository friendshipRepository; // << injeta
 
     public FriendRequestResponse createFriendRequest(String senderId, String receiverId) {
         log.info("Criando solicitação de amizade de '{}' para '{}'", senderId, receiverId);
@@ -44,7 +47,12 @@ public class FriendRequestService {
 
         FriendRequest savedRequest = friendRequestRepository.save(request);
         log.info("Solicitação de amizade salva com ID '{}'", savedRequest.getId());
-        return FriendRequestResponse.from(savedRequest);
+        int mutualCount = friendshipRepository.countMutualFriendsByStatus(
+                sender, receiver, FriendshipStatus.ACTIVE
+        );
+
+
+        return FriendRequestResponse.from(savedRequest, mutualCount);
     }
 
     public List<FriendRequestResponse> getPendingRequests(String receiverId) {
@@ -57,9 +65,12 @@ public class FriendRequestService {
 
         List<FriendRequest> requests = friendRequestRepository.findByReceiverAndStatus(receiver, RequestStatus.PENDING);
         log.info("Encontradas {} solicitações pendentes para o usuário '{}'", requests.size(), receiverId);
-        return requests.stream()
-                .map(FriendRequestResponse::from)
-                .collect(Collectors.toList());
+        return requests.stream().map(req -> {
+            int mutualCount = friendshipRepository.countMutualFriendsByStatus(
+                    req.getSender(), receiver, FriendshipStatus.ACTIVE
+            );
+            return FriendRequestResponse.from(req, mutualCount);
+        }).toList();
     }
 
     @Transactional
@@ -83,6 +94,11 @@ public class FriendRequestService {
             friendshipService.createFriendship(request.getSender(), request.getReceiver());
         }
         FriendRequest updatedRequest = friendRequestRepository.save(request);
-        return FriendRequestResponse.from(updatedRequest);
+        int mutualCount = friendshipRepository.countMutualFriendsByStatus(
+                updatedRequest.getSender(), updatedRequest.getReceiver(),
+                FriendshipStatus.ACTIVE
+        );
+
+        return FriendRequestResponse.from(updatedRequest, mutualCount);
     }
 }

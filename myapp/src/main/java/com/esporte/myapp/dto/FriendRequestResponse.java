@@ -7,17 +7,21 @@ public record FriendRequestResponse(
         Long id,
         RequestStatus status,
         UserResponse sender,
-        UserResponse receiver
+        UserResponse receiver,
+        int mutualCount
 ) {
 
-    public static FriendRequestResponse from(FriendRequest request) {
+    public static FriendRequestResponse from(FriendRequest request, int mutualCount) {
         return new FriendRequestResponse(
                 request.getId(),
                 request.getStatus(),
                 UserResponse.from(request.getSender()),
-                UserResponse.from(request.getReceiver())
+                UserResponse.from(request.getReceiver()),
+                mutualCount
         );
     }
-
+    public static FriendRequestResponse from(FriendRequest request) {
+        return from(request, 0);
+    }
 
 }

@@ -33,5 +33,24 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Friendsh
             "AND " +
             "(CASE WHEN f1.user1 = :user1 THEN f1.user2 ELSE f1.user1 END) = (CASE WHEN f2.user1 = :user2 THEN f2.user2 ELSE f2.user1 END)")
     List<User> findMutualFriendsByStatus(@Param("user1") User user1, @Param("user2") User user2, @Param("status") FriendshipStatus status);
+    @Query("""
+select count(u)
+from User u
+where exists (
+  select 1 from Friendship f
+  where f.status = :status
+    and ((f.user1 = :user1 and f.user2 = u) or (f.user2 = :user1 and f.user1 = u))
+)
+and exists (
+  select 1 from Friendship f
+  where f.status = :status
+    and ((f.user1 = :user2 and f.user2 = u) or (f.user2 = :user2 and f.user1 = u))
+)
+""")
+    int countMutualFriendsByStatus(
+            @Param("user1") User user1,
+            @Param("user2") User user2,
+            @Param("status") FriendshipStatus status
+    );
 
 }
