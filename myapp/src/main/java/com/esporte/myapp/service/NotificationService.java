@@ -45,6 +45,7 @@ public class NotificationService {
         n.setDescription(req.description());
         n.setTagText(req.tagText());
         n.setTagIcon(req.tagIcon());
+        n.setTagUrl(req.tagUrl());
 
         if (req.relatedEventId() != null) {
             Event ev = eventRepo.findById(req.relatedEventId())
@@ -75,10 +76,11 @@ public class NotificationService {
             String tagText,
             String tagIcon,
             Long relatedEventId,
-            Long entryId
+            Long entryId,
+            String tagUrl
     ) {
         NotificationRequest req = new NotificationRequest(
-                type, iconName, title, description, tagText, tagIcon, relatedEventId, entryId, null
+                type, iconName, title, description, tagText, tagIcon, relatedEventId, entryId, null, tagUrl
         );
         create(targetUserId, req);
     }

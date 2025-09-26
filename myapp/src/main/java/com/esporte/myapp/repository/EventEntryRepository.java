@@ -39,5 +39,7 @@ public interface EventEntryRepository extends JpaRepository<EventEntry, Long> {
     """)
     List<EventEntry> findAcceptedByEventIdFetchUser(@Param("eventId") Long eventId);
 
+    
+
 
 }

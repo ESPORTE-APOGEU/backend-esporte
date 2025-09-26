@@ -79,7 +79,8 @@ public class EventEntryService {
                     null,
                     null,
                     event.getId(),
-                    entry.getId()
+                    entry.getId(),
+                    null
 
             );
         }
@@ -117,17 +118,38 @@ public class EventEntryService {
         // Notifica o participante
         User participant = entry.getUser();
         if (participant != null) {
+
+            String local = event.getLocation();
+            if (local != null && !local.isBlank()) {
+                notificationService.notifyUser(
+                        entry.getUser().getId(),
+                        "event_location",
+                        "Local do evento",
+                        // **agora inclui o local** depois do “em”
+                        event.getName() + " está localizado em " + local,
+                        "info",
+                        null,   // sem pill nessa
+                        null,
+                        event.getId(),
+                        entry.getId(),
+                        null
+                );
+            }
+
             notificationService.notifyUser(
                     entry.getUser().getId(),
                     "entry_accepted",
-                    "Entrada aceita!",
-                    "Você foi aceito no evento: " + event.getName(),
-                    "info",
-                    null,
+                    "Você foi aceito no evento!",
+                    // descrição completa (frontend usa apenas para fallback)
+                    "Você foi aceito no evento: " + event.getName() + ". Clique aqui para entrar no grupo de WhatsApp.",
+                    "whatsapp",           // ícone coerente com o layout
+                    event.getName(),      // tagText -> aparece no "pill" ao lado do timestamp
                     null,
                     event.getId(),
-                    entry.getId()
+                    entry.getId(),
+                    event.getWhatsappLink()
             );
+
         }
     }
 
@@ -165,7 +187,8 @@ public class EventEntryService {
                     null,
                     null,
                     event.getId(),
-                    entry.getId()
+                    entry.getId(),
+                    null
             );
         }
     }

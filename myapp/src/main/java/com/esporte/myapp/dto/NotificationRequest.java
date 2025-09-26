@@ -12,5 +12,6 @@ public record NotificationRequest(
         String tagIcon,
         Long relatedEventId,
         Long entryId,
-        LocalDateTime timestamp // opcional; se null, backend usa now()
+        LocalDateTime timestamp,
+        String tagUrl                // <-- novo
 ) {}

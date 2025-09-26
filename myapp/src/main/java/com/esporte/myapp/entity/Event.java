@@ -5,6 +5,7 @@ import lombok.*;
 import org.locationtech.jts.geom.Point;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 @Entity
 @Table(name = "events")
@@ -45,6 +46,10 @@ public class Event {
 
     @Column(name = "max_participants")
     private int maxParticipants;
+
+    @Column(name = "start_reminder_sent_at")
+    private LocalDateTime startReminderSentAt;
+
     public Long getId() {
         return id;
     }

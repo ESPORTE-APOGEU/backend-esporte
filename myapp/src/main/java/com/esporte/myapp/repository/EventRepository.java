@@ -42,4 +42,12 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
 
     List<Event> findByCreator_Id(String creatorId);
 
+    @Query("""
+        select e
+          from Event e
+         where e.startReminderSentAt is null
+           and e.date between :fromDate and :toDate
+    """)
+    List<Event> findCandidatesForStartReminder(LocalDate fromDate, LocalDate toDate);
+
 }

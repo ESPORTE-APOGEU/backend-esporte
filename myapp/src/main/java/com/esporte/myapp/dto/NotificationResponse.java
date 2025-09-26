@@ -18,7 +18,9 @@ public record NotificationResponse(
         Long entryId,
         String actorId,
         String actorName,
-        String actorPhoto
+        String actorPhoto,
+        String tagUrl                // <-- novo
+
 ) {
     public static NotificationResponse from(Notification n) {
         User actor = (n.getRelatedEntry() != null) ? n.getRelatedEntry().getUser() : null;
@@ -47,7 +49,8 @@ public record NotificationResponse(
                 n.getRelatedEntry() != null ? n.getRelatedEntry().getId() : null,
                 actor != null ? actor.getId() : null,
                 finalName,
-                finalPhoto
+                finalPhoto,
+                n.getTagUrl()
         );
     }
 }

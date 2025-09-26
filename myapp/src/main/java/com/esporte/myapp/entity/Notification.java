@@ -25,7 +25,7 @@ public class Notification {
     private User user;
 
     @Column(nullable = false, length = 50)
-    private String type;         // ex.: entry_request, entry_accepted, entry_declined
+    private String type;         // ex.: entry_request, entry_accepted, entry_location
 
     @Column(length = 50)
     private String iconName;     // ex.: "info" (usado no front)
@@ -61,6 +61,9 @@ public class Notification {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "entry_id")
     private EventEntry relatedEntry;
+
+    @Column(name = "tag_url", length = 500)
+    private String tagUrl;
 
     @PrePersist
     public void prePersist() {
