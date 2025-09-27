@@ -50,4 +50,13 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
     """)
     List<Event> findCandidatesForStartReminder(LocalDate fromDate, LocalDate toDate);
 
+    @Query("""
+   select e
+     from Event e
+     join e.creator c
+    where e.date >= :date
+      and lower(c.name) like lower(concat('%', :creatorName, '%'))
+""")
+    List<Event> findUpcomingByCreatorName(@Param("date") LocalDate date,
+                                          @Param("creatorName") String creatorName);
 }

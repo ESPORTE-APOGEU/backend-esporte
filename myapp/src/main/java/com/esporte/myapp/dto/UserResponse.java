@@ -17,7 +17,10 @@ public record UserResponse(
         Gender gender,
         String city,
         List<String> sports,
-        String photo
+        String photo,
+        Integer totalSkill,
+        Integer totalRating,
+        Integer totalReceivedEvaluations
 ) {
     public static UserResponse from(User u) {
         return new UserResponse(
@@ -29,7 +32,10 @@ public record UserResponse(
                 u.getGender(),
                 u.getCity(),
                 u.getSports(),
-                u.getPhoto()
+                u.getPhoto(),
+                u.getTotalSkill(),
+                u.getTotalRating(),
+                u.getTotalReceivedEvaluations()
         );
     }
 }

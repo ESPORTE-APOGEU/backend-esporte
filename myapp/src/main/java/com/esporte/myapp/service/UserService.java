@@ -64,7 +64,10 @@ public class UserService {
                 u.getGender(),
                 u.getCity(),
                 u.getSports(),
-                u.getPhoto()
+                u.getPhoto(),
+                u.getTotalSkill(),
+                u.getTotalRating(),
+                u.getTotalReceivedEvaluations()
         );
     }
 

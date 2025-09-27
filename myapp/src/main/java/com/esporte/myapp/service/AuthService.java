@@ -41,7 +41,10 @@ public class AuthService {
                 user.getGender(),
                 user.getCity(),
                 user.getSports(),
-                user.getPhoto()
+                user.getPhoto(),
+                user.getTotalSkill(),
+                user.getTotalRating(),
+                user.getTotalReceivedEvaluations()
         );
     }
 }

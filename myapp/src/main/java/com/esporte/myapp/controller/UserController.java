@@ -2,7 +2,10 @@ package com.esporte.myapp.controller;
 
 import com.esporte.myapp.dto.UserRequest;
 import com.esporte.myapp.dto.UserResponse;
+import com.esporte.myapp.dto.UserSportStatDTO;
 import com.esporte.myapp.entity.User;
+import com.esporte.myapp.entity.UserSportStats;
+import com.esporte.myapp.repository.UserSportStatsRepository;
 import com.esporte.myapp.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +24,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService service;
+    private final UserSportStatsRepository  userSportStatsRepository;
 
     /**
      * Retorna o perfil do usuário autenticado (pelo sub do JWT).
@@ -104,6 +108,19 @@ public class UserController {
         return ResponseEntity.ok(service.updateSports(jwt.getSubject(), sports));
     }
 
+    @GetMapping("/{id}/sport-stats")
+    public ResponseEntity<List<UserSportStatDTO>> getUserSportStats(@PathVariable String id) {
+        List<UserSportStats> stats = userSportStatsRepository.findByUser_Id(id);
+        List<UserSportStatDTO> dto = stats.stream().map(s -> new UserSportStatDTO(
+                s.getSport(),
+                s.getTotalSkill(),
+                s.getTotalReceivedEvaluations(),
+                s.getTotalReceivedEvaluations() != 0
+                        ? (double) s.getTotalSkill() / (double) s.getTotalReceivedEvaluations()
+                        : null
+        )).toList();
+        return ResponseEntity.ok(dto);
+    }
 
 
 }

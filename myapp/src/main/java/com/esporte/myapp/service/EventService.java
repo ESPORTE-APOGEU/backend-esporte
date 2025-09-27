@@ -51,6 +51,7 @@ public class EventService {
                 .filter(e -> e.getDate().isAfter(today) || e.getDate().isEqual(today))
                 .filter(e -> filter.sports() == null || filter.sports().isEmpty() || filter.sports().contains(e.getSport()))
                 .filter(e -> filter.levels() == null || filter.levels().isEmpty() || filter.levels().contains(e.getLevel()))
+                .filter(e -> filter.gender() == null || filter.gender().isBlank() || filter.gender().equalsIgnoreCase(e.getGender()))
                 .filter(e -> filter.date() == null || e.getDate().equals(filter.date()))
                 .filter(e -> {
                     if (filter.startTime() != null && filter.endTime() != null) {
@@ -114,25 +115,19 @@ public class EventService {
         return toResponse(e, false);
     }
 
+    // src/main/java/com/esporte/myapp/service/EventService.java
     private EventResponse toResponse(Event e, Boolean eager) {
-        User creator = null;
-        if(eager) {
-            creator = e.getCreator();
-        }else{
-            creator = userRepo.findByid(e.getCreator().getId());
-        }
+        User creator = eager ? e.getCreator() : userRepo.findByid(e.getCreator().getId());
 
-        // Ajuste estes getters para o que existir na sua entidade User
-        // (ex.: getFullName()/getName(), getPhotoUrl()/getAvatar(), etc.)
-        String organizerId    = creator != null ? creator.getId() : null; // se seu ID for String, ok; senão toString()
-        String organizerName  = null;
-        String organizerPhoto = null;
+        String organizerId    = (creator != null ? creator.getId() : null);
+        String organizerName  = (creator != null ? safe(creator.getName())  : null);
+        String organizerPhoto = (creator != null ? safe(creator.getPhoto()) : null);
 
-        if (creator != null) {
-            System.out.println(creator);
-            organizerName  = safe(creator.getName());
-            organizerPhoto = safe(creator.getPhoto());   // <-- NOVO
-        }
+        // conta participantes aceitos (exclui organizador) e soma +1 do organizador
+        long accepted = eventEntryRepository.countByEvent_IdAndStatus(
+                e.getId(), com.esporte.myapp.enums.RequestStatus.ACCEPTED
+        );
+        int participantCount = (int) accepted + 1; // inclui o organizador
 
         return new EventResponse(
                 e.getId(),
@@ -149,7 +144,9 @@ public class EventService {
                 organizerId,
                 organizerName,
                 organizerPhoto,
-                e.getCoverImageUrl()
+                e.getCoverImageUrl(),
+                e.getMaxParticipants(),
+                participantCount
         );
     }
 

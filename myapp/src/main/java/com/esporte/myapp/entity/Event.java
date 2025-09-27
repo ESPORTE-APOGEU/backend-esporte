@@ -50,6 +50,9 @@ public class Event {
     @Column(name = "start_reminder_sent_at")
     private LocalDateTime startReminderSentAt;
 
+    @Column(name = "avaliations_requested")
+    private Boolean avaliationsRequested = false;
+
     public Long getId() {
         return id;
     }
