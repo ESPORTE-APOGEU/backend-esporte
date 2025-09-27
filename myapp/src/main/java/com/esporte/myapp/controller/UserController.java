@@ -104,4 +104,6 @@ public class UserController {
         return ResponseEntity.ok(service.updateSports(jwt.getSubject(), sports));
     }
 
+
+
 }

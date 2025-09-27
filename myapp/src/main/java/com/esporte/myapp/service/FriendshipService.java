@@ -1,5 +1,6 @@
 package com.esporte.myapp.service;
 
+import com.esporte.myapp.dto.UserResponse;
 import com.esporte.myapp.entity.Friendship;
 import com.esporte.myapp.entity.User;
 import com.esporte.myapp.enums.FriendshipStatus;
@@ -48,7 +49,33 @@ public class FriendshipService {
         log.info("Amizade entre '{}' e '{}' foi desfeita (status INATIVO)", currentUserId, friendToRemoveId);
     }
 
+    @Transactional(readOnly = true)
     public List<User> findActiveFriends(User user) {
-        return friendshipRepository.findFriendsOfUserByStatus(user, FriendshipStatus.ACTIVE);
+        List<Friendship> edges = friendshipRepository
+                .findFriendshipsOfUserByStatus(user, FriendshipStatus.ACTIVE);
+
+        return edges.stream()
+                .map(f -> f.getUser1().equals(user) ? f.getUser2() : f.getUser1())
+                .toList();
     }
+
+
+    @Transactional(readOnly = true)
+    public List<UserResponse> getFriendsOf(String userId) {
+        User me = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        // Busca TODAS as amizades ativas envolvendo o usuário
+        var edges = friendshipRepository.findFriendshipsOfUserByStatus(me, FriendshipStatus.ACTIVE);
+
+        // Para cada edge, pega “o outro” usuário e converte para DTO
+        return edges.stream()
+                .map(f -> {
+                    User other = me.getId().equals(f.getUser1().getId()) ? f.getUser2() : f.getUser1();
+                    return UserResponse.from(other);
+                })
+                .toList();
+    }
+
+
 }

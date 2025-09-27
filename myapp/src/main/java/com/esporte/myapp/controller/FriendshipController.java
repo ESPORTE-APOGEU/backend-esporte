@@ -1,15 +1,15 @@
 package com.esporte.myapp.controller;
 
+import com.esporte.myapp.dto.UserResponse;
 import com.esporte.myapp.service.FriendshipService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/friendships")
@@ -27,4 +27,10 @@ public class FriendshipController {
         log.info("<= Amizade desfeita com sucesso.");
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/{id}/friends")
+    public ResponseEntity<List<UserResponse>> getUserFriends(@PathVariable String id) {
+        return ResponseEntity.ok(friendshipService.getFriendsOf(id));
+    }
+
 }

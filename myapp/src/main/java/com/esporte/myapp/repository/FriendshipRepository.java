@@ -13,10 +13,19 @@ import java.util.Optional;
 
 public interface FriendshipRepository extends JpaRepository<Friendship, FriendshipId> {
 
-    @Query("SELECT f.user1 FROM Friendship f WHERE f.user2 = :user AND f.status = :status " +
-            "UNION " +
-            "SELECT f.user2 FROM Friendship f WHERE f.user1 = :user AND f.status = :status")
-    List<User> findFriendsOfUserByStatus(@Param("user") User user, @Param("status") FriendshipStatus status);
+// REMOVA o método com CASE
+
+    @Query("""
+select f
+from Friendship f
+where (f.user1 = :user or f.user2 = :user)
+  and f.status = :status
+""")
+    List<Friendship> findFriendshipsOfUserByStatus(
+            @Param("user") User user,
+            @Param("status") FriendshipStatus status
+    );
+
 
     @Query("SELECT f FROM Friendship f WHERE (f.user1 = :userA AND f.user2 = :userB) OR (f.user1 = :userB AND f.user2 = :userA)")
     Optional<Friendship> findFriendshipBetween(@Param("userA") User userA, @Param("userB") User userB);
