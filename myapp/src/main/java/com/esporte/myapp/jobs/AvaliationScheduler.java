@@ -1,4 +1,4 @@
-package com.esporte.myapp.scheduler;
+package com.esporte.myapp.jobs;
 
 import com.esporte.myapp.entity.Event;
 import com.esporte.myapp.repository.EventRepository;
@@ -19,16 +19,20 @@ public class AvaliationScheduler {
 
     private final EventRepository eventRepository;
     private final AvaliationService avaliationService;
-
-    @Scheduled(fixedDelayString = "PT24H")
+    // AvaliationScheduler.java
+    @Scheduled(cron = "0 */1 * * * *")
     @Transactional
     public void scanAndGenerate() {
         LocalDateTime now = LocalDateTime.now();
         List<Event> events = eventRepository.findAll();
         for (Event e : events) {
             try {
+                if (e.getEndTime() == null || e.getDate() == null) continue; // sem horário/data? pula
                 LocalDateTime end = LocalDateTime.of(e.getDate(), e.getEndTime());
-                if (end.isBefore(now) && (e.getAvaliationsRequested() == null || !e.getAvaliationsRequested())) {
+
+                // SOMENTE após 1 dia do fim
+                boolean due = end.plusDays(1).isBefore(now);
+                if (due && (e.getAvaliationsRequested() == null || !e.getAvaliationsRequested())) {
                     avaliationService.generateRequestsForEvent(e.getId());
                     e.setAvaliationsRequested(true);
                     eventRepository.save(e);
@@ -38,4 +42,5 @@ public class AvaliationScheduler {
             }
         }
     }
+
 }

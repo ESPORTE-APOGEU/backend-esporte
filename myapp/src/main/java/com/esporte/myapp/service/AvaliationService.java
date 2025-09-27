@@ -28,6 +28,7 @@ public class AvaliationService {
     private final UserRepository userRepository;
     private final EventEntryRepository eventEntryRepository;
 
+    // AvaliationService.java
     @Transactional
     public void generateRequestsForEvent(Long eventId) {
         Event event = eventRepository.findById(eventId)
@@ -37,48 +38,40 @@ public class AvaliationService {
         if (eventEnd.isAfter(LocalDateTime.now())) {
             throw new IllegalStateException("Event has not ended yet");
         }
-        List<EventEntry> entradas =  eventEntryRepository.findAcceptedByEventIdFetchUser(event.getId());
 
-        List<User> participants = new ArrayList<>(entradas.stream()
-                .map(EventEntry::getUser)
-                .toList());
+        var entries = eventEntryRepository.findAcceptedByEventIdFetchUser(event.getId());
 
-        // Shuffle participants to create random 1:1 pairings
-        Collections.shuffle(participants, new Random());
+        // Participantes + ORGANIZADOR
+        List<User> participants = new ArrayList<>(entries.stream().map(EventEntry::getUser).toList());
+        User organizer = event.getCreator();
+        if (organizer != null && participants.stream().noneMatch(u -> u.getId().equals(organizer.getId()))) {
+            participants.add(organizer);
+        }
 
+        // Se menos de 2 pessoas, não gera nada
+        if (participants.size() < 2) return;
+
+        // Pareamento cíclico: u[i] avalia u[(i+1) % n]
         int n = participants.size();
-        // Pair neighbors (0-1, 2-3, ...). If odd, last participant is left out.
-        for (int i = 0; i + 1 < n; i += 2) {
-            User first = participants.get(i);
-            User second = participants.get(i + 1);
+        for (int i = 0; i < n; i++) {
+            User from = participants.get(i);
+            User to = participants.get((i + 1) % n);
+            if (from.getId().equals(to.getId())) continue; // segurança
 
-            // create request first -> second if not exists
-            boolean existsAtoB = avaliationRepository.findByEventAndFromUserAndToUser(event, first, second).isPresent();
-            if (!existsAtoB) {
+            boolean exists = avaliationRepository
+                    .findByEventAndFromUserAndToUser(event, from, to)
+                    .isPresent();
+
+            if (!exists) {
                 Avaliation a = new Avaliation();
                 a.setEvent(event);
-                a.setFromUser(first);
-                a.setToUser(second);
+                a.setFromUser(from); // AVALIADOR
+                a.setToUser(to);     // AVALIADO
                 a.setStatus(Avaliation.Status.PENDING);
                 a.setRequestedAt(LocalDateTime.now());
                 avaliationRepository.save(a);
             }
-
-            // create request second -> first if not exists (so both receive one evaluation)
-            boolean existsBtoA = avaliationRepository.findByEventAndFromUserAndToUser(event, second, first).isPresent();
-            if (!existsBtoA) {
-                Avaliation b = new Avaliation();
-                b.setEvent(event);
-                b.setFromUser(second);
-                b.setToUser(first);
-                b.setStatus(Avaliation.Status.PENDING);
-                b.setRequestedAt(LocalDateTime.now());
-                avaliationRepository.save(b);
-            }
         }
-
-        // If odd number of participants the last one (participants.get(n-1)) is left without pairing.
-        // To form a trio instead, implement logic here to pair the last three participants appropriately.
     }
 
     public Event getEventReferenceById(Long eventId) {

@@ -53,31 +53,26 @@ public class AvaliationController {
         return ResponseEntity.ok(response);
     }
 
-    // Respond to an existing avaliation by id
     @PostMapping("/{id}/respond")
     @Transactional
-    public ResponseEntity<Void> respond(@PathVariable Long id, @RequestBody AvaliationResponseRequest req,
-                                        @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.oauth2.jwt.Jwt jwt,
-                                        org.springframework.security.core.Authentication authentication) {
-        Avaliation a = avaliationRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Avaliation not found"));
+    public ResponseEntity<Void> respond(
+            @PathVariable Long id,
+            @RequestBody AvaliationResponseRequest req,
+            @AuthenticationPrincipal Jwt jwt,
+            Authentication authentication
+    ) {
+        Avaliation a = avaliationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Avaliation not found"));
 
-        // Identifica o usuário autenticado
-        String clerkId = (jwt != null) ? jwt.getSubject() : null;
-        if (clerkId == null && authentication != null) {
-            Object principal = authentication.getPrincipal();
-            if (principal instanceof String s) clerkId = s; else clerkId = authentication.getName();
-        }
-        if (clerkId == null) {
-            return ResponseEntity.status(401).build();
-        }
+        String clerkId = (jwt != null) ? jwt.getSubject()
+                : (authentication != null ? authentication.getName() : null);
+        if (clerkId == null) return ResponseEntity.status(401).build();
 
-        // Garante que o usuário autenticado é o autor da avaliação
-        // Garante que o usuário autenticado é o destinatário da avaliação (quem deve responder)
-        if (!a.getToUser().getId().equals(clerkId)) {
+        // ERA: a.getToUser() —> AGORA: a.getFromUser()
+        if (!a.getFromUser().getId().equals(clerkId)) {
             return ResponseEntity.status(403).build();
         }
 
-        // validação do rating
         if (req.rating() != null) {
             if (req.rating() < 1 || req.rating() > 5) {
                 throw new IllegalArgumentException("Rating must be between 1 and 5");
@@ -89,22 +84,26 @@ public class AvaliationController {
 
         Integer skillNumeric = null;
         if (req.skillLevel() != null) {
-            try {
-                Avaliation.SkillLevel enumVal = Avaliation.SkillLevel.valueOf(req.skillLevel());
-                a.setSkillLevel(enumVal);
-                skillNumeric = convertSkillToInt(enumVal);
-            } catch (IllegalArgumentException ex) {
-                throw new IllegalArgumentException("Invalid skill level");
-            }
+            Avaliation.SkillLevel enumVal = Avaliation.SkillLevel.valueOf(req.skillLevel());
+            a.setSkillLevel(enumVal);
+            skillNumeric = switch (enumVal) {
+                case INICIANTE -> 0;
+                case INTERMEDIARIO -> 1;
+                case AVANCADO -> 2;
+                case SEMIPROFISSIONAL -> 3;
+            };
         }
 
         a.setStatus(Avaliation.Status.COMPLETED);
         a.setRespondedAt(LocalDateTime.now());
-
         avaliationRepository.save(a);
 
-        // atualiza agregados do usuário
-        avaliationService.updateUserAggregatesOnNewCompletion(a.getToUser().getId(), a.getRating(), skillNumeric);
+        // Atualiza agregados de QUEM FOI AVALIADO (toUser)
+        avaliationService.updateUserAggregatesOnNewCompletion(
+                a.getToUser().getId(),
+                a.getRating(),
+                skillNumeric
+        );
 
         return ResponseEntity.noContent().build();
     }
