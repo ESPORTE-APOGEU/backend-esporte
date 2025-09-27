@@ -51,6 +51,7 @@ public class EventService {
                 .filter(e -> e.getDate().isAfter(today) || e.getDate().isEqual(today))
                 .filter(e -> filter.sports() == null || filter.sports().isEmpty() || filter.sports().contains(e.getSport()))
                 .filter(e -> filter.levels() == null || filter.levels().isEmpty() || filter.levels().contains(e.getLevel()))
+                .filter(e -> filter.gender() == null || filter.gender().isBlank() || filter.gender().equalsIgnoreCase(e.getGender()))
                 .filter(e -> filter.date() == null || e.getDate().equals(filter.date()))
                 .filter(e -> {
                     if (filter.startTime() != null && filter.endTime() != null) {

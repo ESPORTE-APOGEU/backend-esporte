@@ -5,13 +5,14 @@ import java.time.LocalTime;
 import java.util.List;
 
 public record EventFilterRequest(
-    Double latitude,
-    Double longitude,
-    Double maxDistanceKm,
-    List<String> sports,
-    List<String> levels,
-    LocalDate date,
-    LocalTime startTime,
-    LocalTime endTime,
-    String name
-) {}
+     String name,
+     List<String> sports,
+     List<String> levels,
+     String gender,            // <<< NOVO
+     LocalDate date,
+     LocalTime startTime,
+     LocalTime endTime,
+     Double latitude,
+     Double longitude,
+     Double maxDistanceKm
+ ) {}
