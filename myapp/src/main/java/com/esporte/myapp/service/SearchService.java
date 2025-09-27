@@ -7,10 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -21,17 +18,25 @@ public class SearchService {
     public List<Event> searchUpcoming(String searchTerm) {
         LocalDate today = LocalDate.now();
 
-        Set<Event> results = new LinkedHashSet<>();
-        results.addAll(repo.findByDateGreaterThanEqualAndNameContainingIgnoreCase(today, searchTerm));
-//        results.addAll(repo.findByDateGreaterThanEqualAndCreator_NameContainingIgnoreCase(today, searchTerm));
-        results.addAll(repo.findByDateGreaterThanEqualAndSportContainingIgnoreCase(today, searchTerm));
-        results.addAll(repo.findByDateGreaterThanEqualAndDescriptionContainingIgnoreCase(today, searchTerm));
+        Map<Long, Event> byId = new LinkedHashMap<>();
 
-        return new ArrayList<>(results);
+        repo.findByDateGreaterThanEqualAndNameContainingIgnoreCase(today, searchTerm)
+                .forEach(e -> byId.putIfAbsent(e.getId(), e));
+
+        repo.findByDateGreaterThanEqualAndSportContainingIgnoreCase(today, searchTerm)
+                .forEach(e -> byId.putIfAbsent(e.getId(), e));
+
+        repo.findByDateGreaterThanEqualAndDescriptionContainingIgnoreCase(today, searchTerm)
+                .forEach(e -> byId.putIfAbsent(e.getId(), e));
+
+        // novo: nome do organizador
+        repo.findUpcomingByCreatorName(today, searchTerm)
+                .forEach(e -> byId.putIfAbsent(e.getId(), e));
+
+        return new ArrayList<>(byId.values());
     }
 
     public List<Event> searchUpcomingByAnyField(String searchTerm) {
         return searchUpcoming(searchTerm);
     }
-
 }
