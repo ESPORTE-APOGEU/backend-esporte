@@ -17,4 +17,7 @@ public interface FriendRequestRepository extends JpaRepository<FriendRequest, St
            "union " +
            "select fr.receiver from FriendRequest fr where fr.sender = :user and fr.status = 'ACCEPTED'")
     List<User> findFriendsOfUser(@Param("user") User user);
+
+    @Query("SELECT fr FROM FriendRequest fr WHERE (fr.sender = :user OR fr.receiver = :user) AND fr.status = 'PENDING'")
+    List<FriendRequest> findPendingRequestsInvolvingUser(@Param("user") User user);
 }

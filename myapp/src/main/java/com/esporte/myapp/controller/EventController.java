@@ -70,4 +70,14 @@ public class EventController {
         return service.getParticipants(id, userId);
     }
 
+    @GetMapping("/user/{userId}/registered")
+    public List<UserEventItemResponse> userRegistered(@PathVariable String userId) {
+        return service.getMyRegisteredEvents(userId);
+    }
+
+    @GetMapping("/user/{userId}/participated")
+    public List<UserEventItemResponse> userParticipated(@PathVariable String userId) {
+        return service.getMyParticipatedEvents(userId);
+    }
+
 }
