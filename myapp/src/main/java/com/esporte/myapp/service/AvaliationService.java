@@ -1,14 +1,8 @@
 package com.esporte.myapp.service;
 
-import com.esporte.myapp.entity.Avaliation;
-import com.esporte.myapp.entity.Event;
-import com.esporte.myapp.entity.EventEntry;
-import com.esporte.myapp.entity.User;
+import com.esporte.myapp.entity.*;
 import com.esporte.myapp.enums.RequestStatus;
-import com.esporte.myapp.repository.AvaliationRepository;
-import com.esporte.myapp.repository.EventEntryRepository;
-import com.esporte.myapp.repository.EventRepository;
-import com.esporte.myapp.repository.UserRepository;
+import com.esporte.myapp.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +21,7 @@ public class AvaliationService {
     private final AvaliationRepository avaliationRepository;
     private final UserRepository userRepository;
     private final EventEntryRepository eventEntryRepository;
+    private final UserSportStatsRepository userSportStatsRepository;
 
     // AvaliationService.java
     @Transactional
@@ -67,6 +62,7 @@ public class AvaliationService {
                 a.setEvent(event);
                 a.setFromUser(from); // AVALIADOR
                 a.setToUser(to);     // AVALIADO
+                a.setSport(event.getSport());
                 a.setStatus(Avaliation.Status.PENDING);
                 a.setRequestedAt(LocalDateTime.now());
                 avaliationRepository.save(a);
@@ -83,13 +79,14 @@ public class AvaliationService {
     }
 
     @Transactional
-    public void updateUserAggregatesOnNewCompletion(String toUserId, Integer rating, Integer skillLevel) {
-        // Incrementally update user's aggregated counters instead of recomputing everything
-        User user = userRepository.findById(toUserId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+    public void updateUserAggregatesOnNewCompletion(String toUserId, Integer rating, Integer skillLevel, String sport) {
+        // ----- agregados globais -----
+        User user = userRepository.findById(toUserId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         Integer currentSkillSum = user.getTotalSkill() == null ? 0 : user.getTotalSkill();
         Integer currentRatingSum = user.getTotalRating() == null ? 0 : user.getTotalRating();
-        Integer currentCount = user.getTotalReceivedEvaluations() == null ? 0 : user.getTotalReceivedEvaluations();
+        Integer currentCount     = user.getTotalReceivedEvaluations() == null ? 0 : user.getTotalReceivedEvaluations();
 
         if (rating != null) {
             currentRatingSum += rating;
@@ -99,9 +96,26 @@ public class AvaliationService {
             currentSkillSum += skillLevel;
             user.setTotalSkill(currentSkillSum);
         }
-        currentCount += 1;
-        user.setTotalReceivedEvaluations(currentCount);
-
+        user.setTotalReceivedEvaluations(currentCount + 1);
         userRepository.save(user);
+
+        // ----- agregados por esporte -----
+        if (sport != null && !sport.isBlank() && skillLevel != null) {
+            UserSportStats stats = userSportStatsRepository
+                    .findByUser_IdAndSport(toUserId, sport)
+                    .orElseGet(() -> {
+                        UserSportStats s = new UserSportStats();
+                        s.setUser(user);
+                        s.setSport(sport);
+                        s.setTotalSkill(0);
+                        s.setTotalReceivedEvaluations(0);
+                        return s;
+                    });
+
+            stats.setTotalSkill(stats.getTotalSkill() + skillLevel);
+            stats.setTotalReceivedEvaluations(stats.getTotalReceivedEvaluations() + 1);
+            stats.setUpdatedAt(java.time.LocalDateTime.now());
+            userSportStatsRepository.save(stats);
+        }
     }
 }

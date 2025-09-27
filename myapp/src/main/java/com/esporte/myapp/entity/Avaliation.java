@@ -48,6 +48,10 @@ public class Avaliation {
     @Column(name = "responded_at")
     private LocalDateTime respondedAt;
 
+    @Column(name = "sport", length = 80)
+    private String sport;
+
+
     public enum Status {
         PENDING,
         COMPLETED

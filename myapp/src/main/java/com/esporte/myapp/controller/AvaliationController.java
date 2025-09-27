@@ -102,7 +102,8 @@ public class AvaliationController {
         avaliationService.updateUserAggregatesOnNewCompletion(
                 a.getToUser().getId(),
                 a.getRating(),
-                skillNumeric
+                skillNumeric,
+                (a.getSport() != null ? a.getSport() : (a.getEvent() != null ? a.getEvent().getSport() : null)) // fallback de segurança
         );
 
         return ResponseEntity.noContent().build();
