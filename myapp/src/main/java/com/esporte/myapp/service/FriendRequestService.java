@@ -74,7 +74,7 @@ public class FriendRequestService {
     }
 
     @Transactional
-    public FriendRequestResponse respondToRequest(String currentUserId, String requestId, RequestStatus status) {
+    public FriendRequestResponse respondToRequest(String currentUserId, Long requestId, RequestStatus status) {
         log.info("Processando resposta para a solicitação '{}' pelo usuário '{}' com status '{}'", requestId, currentUserId, status);
         FriendRequest request = friendRequestRepository.findById(requestId)
                 .orElseThrow(() -> {

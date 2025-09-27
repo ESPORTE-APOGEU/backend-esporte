@@ -45,7 +45,7 @@ public class FriendRequestController {
             @RequestParam RequestStatus status) {
         String userId = jwt.getSubject();
         log.info("=> Usuário '{}' respondendo à solicitação '{}' com o status '{}'", userId, requestId, status);
-        FriendRequestResponse request = friendRequestService.respondToRequest(userId, requestId, status);
+        FriendRequestResponse request = friendRequestService.respondToRequest(userId, Long.valueOf(requestId), status);
         log.info("<= Solicitação '{}' atualizada com sucesso para o status '{}'", requestId, status);
         return ResponseEntity.ok(request);
     }

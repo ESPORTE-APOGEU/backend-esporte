@@ -1,5 +1,6 @@
 package com.esporte.myapp.controller;
 
+import com.esporte.myapp.dto.MutualFriendsDTO;
 import com.esporte.myapp.dto.UserResponse;
 import com.esporte.myapp.service.FriendshipService;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,25 @@ public class FriendshipController {
     @GetMapping("/{id}/friends")
     public ResponseEntity<List<UserResponse>> getUserFriends(@PathVariable String id) {
         return ResponseEntity.ok(friendshipService.getFriendsOf(id));
+    }
+
+    // controller/FriendshipController.java
+    @GetMapping("/mutual/{otherId}")
+    public ResponseEntity<MutualFriendsDTO> getMutualFriends(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable String otherId
+    ) {
+        String meId = jwt.getSubject();
+        var mutual = friendshipService.findMutualFriends(meId, otherId);
+
+        // mande todos e deixe o app decidir quantos mostrar, ou corte aqui:
+        int total = mutual.size();
+        var top = mutual.stream()
+                .limit(3) // os 3 avatares do Figma
+                .map(UserResponse::from)
+                .toList();
+
+        return ResponseEntity.ok(new MutualFriendsDTO(total, top));
     }
 
 }

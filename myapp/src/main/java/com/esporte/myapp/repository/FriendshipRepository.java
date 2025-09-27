@@ -33,15 +33,27 @@ where (f.user1 = :user or f.user2 = :user)
     @Query("SELECT f FROM Friendship f WHERE (f.user1.id IN :userIds OR f.user2.id IN :userIds) AND f.status = :status")
     List<Friendship> findAllActiveFriendshipsForUserIds(@Param("userIds") List<String> userIds, @Param("status") FriendshipStatus status);
 
-    @Query("SELECT DISTINCT CASE WHEN f1.user1 = :user1 THEN f1.user2 ELSE f1.user1 END " +
-            "FROM Friendship f1, Friendship f2 " +
-            "WHERE " +
-            "((f1.user1 = :user1 AND f1.user2 <> :user2) OR (f1.user2 = :user1 AND f1.user1 <> :user2)) AND f1.status = :status " +
-            "AND " +
-            "((f2.user1 = :user2 AND f2.user2 <> :user1) OR (f2.user2 = :user2 AND f2.user1 <> :user1)) AND f2.status = :status " +
-            "AND " +
-            "(CASE WHEN f1.user1 = :user1 THEN f1.user2 ELSE f1.user1 END) = (CASE WHEN f2.user1 = :user2 THEN f2.user2 ELSE f2.user1 END)")
-    List<User> findMutualFriendsByStatus(@Param("user1") User user1, @Param("user2") User user2, @Param("status") FriendshipStatus status);
+    // FriendshipRepository.java
+    @Query("""
+select u
+from User u
+where exists (
+  select 1 from Friendship f
+  where f.status = :status
+    and ( (f.user1 = :user1 and f.user2 = u) or (f.user2 = :user1 and f.user1 = u) )
+)
+and exists (
+  select 1 from Friendship f
+  where f.status = :status
+    and ( (f.user1 = :user2 and f.user2 = u) or (f.user2 = :user2 and f.user1 = u) )
+)
+""")
+    List<User> findMutualFriendsByStatus(
+            @Param("user1") User user1,
+            @Param("user2") User user2,
+            @Param("status") FriendshipStatus status
+    );
+
     @Query("""
 select count(u)
 from User u

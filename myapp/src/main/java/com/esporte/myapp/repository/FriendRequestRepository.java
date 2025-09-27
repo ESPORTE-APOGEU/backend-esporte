@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface FriendRequestRepository extends JpaRepository<FriendRequest, String> {
+public interface FriendRequestRepository extends JpaRepository<FriendRequest, Long> {
     List<FriendRequest> findByReceiverAndStatus(User receiver, com.esporte.myapp.enums.RequestStatus status);
     List<FriendRequest> findBySender(User sender);
 

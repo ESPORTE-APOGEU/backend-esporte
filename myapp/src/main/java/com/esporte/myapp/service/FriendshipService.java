@@ -77,5 +77,17 @@ public class FriendshipService {
                 .toList();
     }
 
+    // service/FriendshipService.java
+    @Transactional(readOnly = true)
+    public List<User> findMutualFriends(String meId, String otherId) {
+        User me = userRepository.findById(meId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found: " + meId));
+        User other = userRepository.findById(otherId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found: " + otherId));
+
+        return friendshipRepository.findMutualFriendsByStatus(
+                me, other, FriendshipStatus.ACTIVE
+        );
+    }
 
 }
