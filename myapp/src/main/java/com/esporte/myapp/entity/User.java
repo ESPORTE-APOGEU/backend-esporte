@@ -48,6 +48,18 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Address> addresses = new ArrayList<>();
 
+
+    @OneToMany(mappedBy = "toUser")
+    private List<Avaliation> receivedAvaliations = new ArrayList<>();
+
+    @Column(name = "total_skill")
+    private Integer totalSkill;
+
+    @Column(name = "total_rating")
+    private Integer totalRating = 0;
+
+    @Column(name = "total_received_evaluations")
+    private Integer totalReceivedEvaluations = 0;
     public User() {}
 
     public User(String id, String name, String email, LocalDateTime createdAt,
