@@ -5,15 +5,23 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+// Este DTO agora reflete todos os campos do seu formulário
 public record EventRequest(
         @NotBlank String name,
         @NotBlank String location,
-        @NotBlank String sport,
+        Double latitude,   // Opcional por enquanto
+        Double longitude,  // Opcional por enquanto
+        @NotBlank String sport, // Apenas um esporte
         @NotBlank String level,
         @NotBlank String gender,
-        @NotNull LocalDate date,
+        @NotNull @FutureOrPresent LocalDate date,
         @NotNull LocalTime startTime,
         @NotNull LocalTime endTime,
-        @NotNull @DecimalMin("0.0") BigDecimal price,
-        String description
+        @NotNull @PositiveOrZero BigDecimal price,
+        String description,
+        String whatsappLink,
+        boolean isPrivate,
+        @NotNull @Min(1) Integer minParticipants,
+        @NotNull @Min(1) Integer maxParticipants,
+        String coverImageUrl
 ) {}

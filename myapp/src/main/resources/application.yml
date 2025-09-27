@@ -23,3 +23,16 @@ logging:
   level:
     org.hibernate.SQL: debug        # mostra SQL (dev only)
     org.hibernate.type.descriptor.sql: trace
+
+
+clerk:
+  issuer: "https://pro-mustang-55.clerk.accounts.dev"     # ex.: https://myapp.clerk.accounts.dev
+  jwks-uri: "https://pro-mustang-55.clerk.accounts.dev/.well-known/jwks.json"
+  audience: "myapp-api"                                   # MESMO 'aud' do template no Clerk
+
+
+cloudinary:
+  cloudName: dsperricn
+  apiKey: 459641612933133
+  apiSecret: EpAV8NIIG7IHYs4LwvqWV_VZb-E
+

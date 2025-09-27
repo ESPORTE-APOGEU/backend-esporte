@@ -1,3 +1,4 @@
+// src/main/java/com/esporte/myapp/dto/EventResponse.java
 package com.esporte.myapp.dto;
 
 import java.math.BigDecimal;
@@ -15,5 +16,15 @@ public record EventResponse(
         LocalTime startTime,
         LocalTime endTime,
         BigDecimal price,
-        String description
+        String description,
+
+        String organizerId,
+        String organizerName,
+        String organizerPhoto,
+
+        String coverImageUrl,
+
+        // 👇 novos campos
+        Integer maxParticipants,
+        Integer participantCount // (ACEITOS + 1 organizador)
 ) {}

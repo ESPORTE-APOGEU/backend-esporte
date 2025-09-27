@@ -2,13 +2,17 @@ package com.esporte.myapp.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.locationtech.jts.geom.Point;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 @Entity
 @Table(name = "events")
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +28,30 @@ public class Event {
     private LocalTime endTime;
     private BigDecimal price;
     private String description;
+    @Column(name = "location_point", columnDefinition = "geography(Point,4326)")
+    private Point locationPoint;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_id", nullable = false)
+    private User creator;
+    @Column(name = "whatsapp_link")
+    private String whatsappLink;
+
+    @Column(name = "is_private")
+    private boolean isPrivate;
+
+    @Column(name = "min_participants")
+    private int minParticipants;
+    @Column(name = "cover_image_url", length = 500)
+    private String coverImageUrl;
+
+    @Column(name = "max_participants")
+    private int maxParticipants;
+
+    @Column(name = "start_reminder_sent_at")
+    private LocalDateTime startReminderSentAt;
+
+    @Column(name = "avaliations_requested")
+    private Boolean avaliationsRequested = false;
 
     public Long getId() {
         return id;
@@ -112,4 +140,11 @@ public class Event {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public Point getLocationPoint() { return locationPoint; }
+    public void setLocationPoint(Point locationPoint) { this.locationPoint = locationPoint; }
+
+    public User getCreator() {return creator;}
+    public void setCreator(User creator) {this.creator = creator;}
+
 }
