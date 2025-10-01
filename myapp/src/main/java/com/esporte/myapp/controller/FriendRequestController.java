@@ -1,6 +1,7 @@
 package com.esporte.myapp.controller;
 
 import com.esporte.myapp.dto.FriendRequestResponse;
+import com.esporte.myapp.dto.FriendRequestStatusDTO;
 import com.esporte.myapp.entity.FriendRequest;
 import com.esporte.myapp.enums.RequestStatus;
 import com.esporte.myapp.service.FriendRequestService;
@@ -48,5 +49,13 @@ public class FriendRequestController {
         FriendRequestResponse request = friendRequestService.respondToRequest(userId, Long.valueOf(requestId), status);
         log.info("<= Solicitação '{}' atualizada com sucesso para o status '{}'", requestId, status);
         return ResponseEntity.ok(request);
+    }
+    @GetMapping("/between/{otherId}")
+    public ResponseEntity<FriendRequestStatusDTO> getBetweenStatus(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable String otherId
+    ) {
+        String meId = jwt.getSubject();
+        return ResponseEntity.ok(friendRequestService.getBetweenStatus(meId, otherId));
     }
 }

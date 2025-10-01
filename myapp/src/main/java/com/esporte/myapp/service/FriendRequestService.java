@@ -1,7 +1,9 @@
 package com.esporte.myapp.service;
 
 import com.esporte.myapp.dto.FriendRequestResponse;
+import com.esporte.myapp.dto.FriendRequestStatusDTO;
 import com.esporte.myapp.entity.FriendRequest;
+import com.esporte.myapp.entity.Friendship;
 import com.esporte.myapp.entity.User;
 import com.esporte.myapp.enums.FriendshipStatus;
 import com.esporte.myapp.enums.RequestStatus;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,17 +31,19 @@ public class FriendRequestService {
     private final FriendshipRepository friendshipRepository; // << injeta
 
     public FriendRequestResponse createFriendRequest(String senderId, String receiverId) {
-        log.info("Criando solicitação de amizade de '{}' para '{}'", senderId, receiverId);
-        User sender = userRepository.findById(senderId)
-                .orElseThrow(() -> {
-                    log.error("Remetente (sender) com ID '{}' não encontrado.", senderId);
-                    return new EntityNotFoundException("Sender not found");
-                });
-        User receiver = userRepository.findById(receiverId)
-                .orElseThrow(() -> {
-                    log.error("Destinatário (receiver) com ID '{}' não encontrado.", receiverId);
-                    return new EntityNotFoundException("Receiver not found");
-                });
+        User sender = userRepository.findById(senderId).orElseThrow(() -> new EntityNotFoundException("Sender not found"));
+        User receiver = userRepository.findById(receiverId).orElseThrow(() -> new EntityNotFoundException("Receiver not found"));
+
+        // 1) já são amigos?
+        Optional<Friendship> existing = friendshipRepository.findFriendshipBetween(sender, receiver);
+        if (existing.isPresent() && existing.get().getStatus() == FriendshipStatus.ACTIVE) {
+            throw new IllegalStateException("Vocês já são amigos.");
+        }
+
+        // 2) existe pendente em qualquer direção?
+        if (!friendRequestRepository.findPendingBetween(sender, receiver).isEmpty()) {
+            throw new IllegalStateException("Já existe uma solicitação pendente entre vocês.");
+        }
 
         FriendRequest request = new FriendRequest();
         request.setSender(sender);
@@ -46,14 +51,28 @@ public class FriendRequestService {
         request.setStatus(RequestStatus.PENDING);
 
         FriendRequest savedRequest = friendRequestRepository.save(request);
-        log.info("Solicitação de amizade salva com ID '{}'", savedRequest.getId());
-        int mutualCount = friendshipRepository.countMutualFriendsByStatus(
-                sender, receiver, FriendshipStatus.ACTIVE
-        );
-
-
+        int mutualCount = friendshipRepository.countMutualFriendsByStatus(sender, receiver, FriendshipStatus.ACTIVE);
         return FriendRequestResponse.from(savedRequest, mutualCount);
     }
+
+    @Transactional(readOnly = true)
+    public FriendRequestStatusDTO getBetweenStatus(String meId, String otherId) {
+        User me = userRepository.findById(meId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        User other = userRepository.findById(otherId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        boolean isFriend = friendshipRepository.findFriendshipBetween(me, other)
+                .map(f -> f.getStatus() == FriendshipStatus.ACTIVE).orElse(false);
+
+        var outgoing = friendRequestRepository.findPendingOutgoing(me, other);    // me -> other
+        var incoming = friendRequestRepository.findPendingIncoming(me, other);    // other -> me
+
+        boolean pendingOutgoing = outgoing.isPresent();
+        boolean pendingIncoming = incoming.isPresent();
+        Long reqId = outgoing.map(FriendRequest::getId).orElseGet(() -> incoming.map(FriendRequest::getId).orElse(null));
+
+        return new FriendRequestStatusDTO(isFriend, pendingOutgoing, pendingIncoming, reqId);
+    }
+
 
     public List<FriendRequestResponse> getPendingRequests(String receiverId) {
         log.info("Buscando solicitações pendentes para o receiver ID '{}'", receiverId);
