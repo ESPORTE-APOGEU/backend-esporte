@@ -79,5 +79,17 @@ public class EventController {
     public List<UserEventItemResponse> userParticipated(@PathVariable String userId) {
         return service.getMyParticipatedEvents(userId);
     }
+    @GetMapping("/me/created")
+    public List<UserEventItemResponse> myCreated(@AuthenticationPrincipal Jwt jwt) {
+        String userId = (jwt != null) ? jwt.getSubject() : null;
+        if (userId == null) throw new RuntimeException("Unauthorized");
+        return service.getCreatedBy(userId);
+    }
+
+    @GetMapping("/user/{userId}/created")
+    public List<UserEventItemResponse> userCreated(@PathVariable String userId) {
+        return service.getCreatedBy(userId);
+    }
+
 
 }

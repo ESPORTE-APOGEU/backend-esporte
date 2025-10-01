@@ -256,6 +256,19 @@ public class EventService {
         return new EventParticipantsResponse(participants, max, acceptedCount, iAmParticipant);
     }
 
+    @Transactional(readOnly = true)
+    public List<UserEventItemResponse> getCreatedBy(String userId) {
+        return repo.findByCreator_Id(userId)
+                .stream()
+                .sorted(Comparator
+                        .comparing(Event::getDate, Comparator.nullsLast(Comparator.reverseOrder()))
+                        .thenComparing(Event::getEndTime, Comparator.nullsLast(Comparator.reverseOrder()))
+                        .thenComparing(Event::getStartTime, Comparator.nullsLast(Comparator.reverseOrder())))
+                .map(UserEventItemResponse::from)
+                .toList();
+    }
+
+
     // ——— helpers ———
 
     // “ainda não aconteceu”: (date > hoje) ou (date == hoje e startTime >= agora ou startTime null)
